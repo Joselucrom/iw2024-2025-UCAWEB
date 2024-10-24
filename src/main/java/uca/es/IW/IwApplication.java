@@ -12,7 +12,7 @@ public class IwApplication {
 		SpringApplication.run(IwApplication.class, args);
 	}
 	@GetMapping("/hello")
-	public String hello(@RequestParam(value = "name", defaultValue = "imbecil") String name) {
-		return String.format("Hello %s!", name);
+	public String hello(@RequestParam(value = "name", defaultValue = "mundo") String name) {
+		return String.format("hola %s", name);
 	}
 }
