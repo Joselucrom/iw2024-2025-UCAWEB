@@ -13,7 +13,9 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
+import uca.es.iw.data.Proyecto;
 import uca.es.iw.services.ProyectoService;
+import java.time.LocalDate;
 
 @PageTitle("Solicitar nuevo proyecto")
 @Route("person-form")
@@ -56,17 +58,20 @@ public class SolicitarnuevoproyectoView extends Composite<VerticalLayout> {
 
         // Acción del botón
         buttonPrimary.addClickListener(event -> {
-            String titulo = tituloField.getValue();
-            String descripcion = descripcionArea.getValue();
-            String justificacion = justificacionArea.getValue();
-            String metas = metasArea.getValue();
-            String impacto = impactoArea.getValue();
-            String alcance = alcanceArea.getValue();
-            String reqFuncionales = reqFuncionalesArea.getValue();
-            String reqNoFuncionales = reqNoFuncionalesArea.getValue();
-            String comentarios = comentariosArea.getValue();
+            Proyecto proyecto = new Proyecto();
+            proyecto.setTitulo(tituloField.getValue());
+            proyecto.setDescripcion(descripcionArea.getValue());
+            proyecto.setJustificacion(justificacionArea.getValue());
+            proyecto.setMetasObjetivo(metasArea.getValue());
+            proyecto.setImpactoEsperado(impactoArea.getValue());
+            proyecto.setAlcance(alcanceArea.getValue());
+            proyecto.setRequisitosFuncionales(reqFuncionalesArea.getValue());
+            proyecto.setRequisitosNoFuncionales(reqNoFuncionalesArea.getValue());
+            proyecto.setComentariosAdicionales(comentariosArea.getValue());
+            proyecto.setFechaSolicitud(LocalDate.now());
+            proyecto.setEstado("Pendiente");
 
-            proyectoService.guardarProyecto(titulo, descripcion, justificacion, metas, impacto, alcance, reqFuncionales, reqNoFuncionales, comentarios);
+            proyectoService.guardarProyecto(proyecto);
 
             Notification.show("Proyecto enviado con éxito");
 
@@ -81,7 +86,6 @@ public class SolicitarnuevoproyectoView extends Composite<VerticalLayout> {
             reqNoFuncionalesArea.clear();
             comentariosArea.clear();
         });
-
 
         // Agregar componentes al layout
         getContent().add(tituloField, descripcionArea, justificacionArea, metasArea, impactoArea, alcanceArea, reqFuncionalesArea, reqNoFuncionalesArea, comentariosArea, buttonPrimary);
