@@ -25,6 +25,8 @@ public class User extends AbstractEntity {
     @Lob
     @Column(length = 1000000)
     private byte[] profilePicture;
+    private String email;
+
 
     public String getUsername() {
         return username;
@@ -56,5 +58,10 @@ public class User extends AbstractEntity {
     public void setProfilePicture(byte[] profilePicture) {
         this.profilePicture = profilePicture;
     }
-
+    public String getEmail() {
+        return email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }
