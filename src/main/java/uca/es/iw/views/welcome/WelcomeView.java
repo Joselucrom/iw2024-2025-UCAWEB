@@ -1,4 +1,4 @@
-package uca.es.iw.views.bienvenido;
+package uca.es.iw.views.welcome;
 
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
@@ -14,9 +14,9 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 @Route("")
 @Menu(order = 0, icon = "line-awesome/svg/file.svg")
 @AnonymousAllowed
-public class BienvenidoView extends VerticalLayout {
+public class WelcomeView extends VerticalLayout {
 
-    public BienvenidoView() {
+    public WelcomeView() {
         setSpacing(false);
 
         Image img = new Image("images/empty-plant.png", "placeholder plant");

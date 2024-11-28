@@ -1,4 +1,4 @@
-package uca.es.iw.views.solicitarnuevoproyecto;
+package uca.es.iw.views.newproyect;
 
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
@@ -21,11 +21,11 @@ import java.time.LocalDate;
 @Route("person-form")
 @Menu(order = 1, icon = "line-awesome/svg/user.svg")
 @RolesAllowed("USER")
-public class SolicitarnuevoproyectoView extends Composite<VerticalLayout> {
+public class NewProyectView extends Composite<VerticalLayout> {
 
     private final ProyectoService proyectoService;
 
-    public SolicitarnuevoproyectoView(ProyectoService proyectoService) {
+    public NewProyectView(ProyectoService proyectoService) {
         this.proyectoService = proyectoService;
 
         TextField tituloField = new TextField("Título del proyecto");
