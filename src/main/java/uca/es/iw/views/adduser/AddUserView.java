@@ -16,7 +16,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import jakarta.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 import uca.es.iw.services.UserService;
@@ -39,17 +38,23 @@ public class AddUserView extends Composite<VerticalLayout> {
     @Autowired
     private UserService userService;  // Inyección de dependencia de UserService
 
+    private TextField nameField;
+    private TextField usernameField;
+    private PasswordField passwordField;
+    private ComboBox<String> roleComboBox;
+    private EmailField emailField;
+
     public AddUserView() {
         VerticalLayout layoutColumn2 = new VerticalLayout();
         H3 h3 = new H3("Información del usuario");
 
         // Formulario
         FormLayout formLayout = new FormLayout();
-        TextField nameField = new TextField("Nombre");
-        TextField usernameField = new TextField("Nombre de usuario");
-        PasswordField passwordField = new PasswordField("Contraseña");
-        ComboBox<String> roleComboBox = new ComboBox<>("Tipo de usuario");
-        EmailField emailField = new EmailField("Email");
+        nameField = new TextField("Nombre");
+        usernameField = new TextField("Nombre de usuario");
+        passwordField = new PasswordField("Contraseña");
+        roleComboBox = new ComboBox<>("Tipo de usuario");
+        emailField = new EmailField("Email");
 
         roleComboBox.setItems("USER", "ADMIN", "OTP", "CIO", "PROMOTOR");
         roleComboBox.setPlaceholder("Seleccione un rol");
@@ -98,39 +103,38 @@ public class AddUserView extends Composite<VerticalLayout> {
                 Notification.show("Error al cargar la imagen", 3000, Notification.Position.MIDDLE);
             }
         });
+
+        // Evento para cuando el archivo es eliminado
+        upload.addFileRemovedListener(event -> {
+            avatar.setImageResource(null); // Elimina la imagen de vista previa
+            profilePictureData = null; // Limpia la imagen almacenada temporalmente
+        });
+
         return upload;
     }
 
-    /*private void saveUser(String name, String username, String password, String role, String email) {
-        if (name.isEmpty() || username.isEmpty() || password.isEmpty() || role == null || email.isEmpty()) {
-            Notification.show("Por favor, complete todos los campos.", 3000, Notification.Position.MIDDLE);
-            return;
-        }
-
-        try {
-            userService.createUser(name, username, password, email, profilePictureData, role);
-            Notification.show("Usuario guardado con éxito.", 3000, Notification.Position.MIDDLE);
-
-            // Opcional: limpiar los campos después de guardar
-
-        } catch (IllegalArgumentException e) {
-            Notification.show(e.getMessage(), 3000, Notification.Position.MIDDLE);
-        } catch (Exception e) {
-            Notification.show("Ocurrió un error al guardar el usuario.", 3000, Notification.Position.MIDDLE);
-        }
-    }*/
+    private void clearForm() {
+        nameField.clear();
+        usernameField.clear();
+        passwordField.clear();
+        roleComboBox.clear();
+        emailField.clear();
+        avatar.setImageResource(null); // Elimina la imagen de vista previa
+        profilePictureData = null;    // Limpia la imagen almacenada temporalmente
+    }
 
     private void saveUser(String name, String username, String password, String role, String email) {
-        if (name.isEmpty() || username.isEmpty() || password.isEmpty() || role == null || email.isEmpty()) {
+        /*if (name.isEmpty() || username.isEmpty() || password.isEmpty() || role == null || email.isEmpty()) {
             Notification.show("Por favor, complete todos los campos.", 3000, Notification.Position.MIDDLE);
             return;
-        }
+        }*/
 
         try {
             userService.createUser(name, username, password, email, profilePictureData, role);
             Notification.show("Usuario guardado con éxito.", 3000, Notification.Position.MIDDLE);
 
-            // Opcional: limpiar los campos después de guardar
+            // Limpiar campos después de guardar
+            clearForm();
 
         } catch (IllegalArgumentException e) {
             Notification.show(e.getMessage(), 3000, Notification.Position.MIDDLE);
