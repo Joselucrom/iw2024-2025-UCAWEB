@@ -1,8 +1,9 @@
-package uca.es.iw.views.explorarproyectos;
+package uca.es.iw.views.searchusers;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -15,7 +16,7 @@ import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
@@ -29,39 +30,38 @@ import jakarta.annotation.security.PermitAll;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import uca.es.iw.data.Proyecto;
-import uca.es.iw.services.ProyectoService;
+import uca.es.iw.data.User;
+import uca.es.iw.services.UserService;
 
-@PageTitle("Explorar Proyectos")
-@Route("explorar-proyectos/:proyectoID?/:action?(edit)")
-@Menu(order = 2, icon = "line-awesome/svg/columns-solid.svg")
+@PageTitle("Buscar Usuarios")
+@Route("buscar-usuarios/:userID?/:action?(edit)")
+@Menu(order = 5, icon = "line-awesome/svg/user-solid.svg")
 @PermitAll
 @Uses(Icon.class)
-public class ExplorarProyectosView extends Div implements BeforeEnterObserver {
+public class SearchUsersView extends Div implements BeforeEnterObserver {
 
-    private final String ProyectoId = "proyectoID";
-    private final String PROYECTO_EDIT_ROUTE_TEMPLATE = "explorar-proyectos/%s/edit";
+    private final String id = "userID";
+    private final String USER_EDIT_ROUTE_TEMPLATE = "buscar-usuarios/%s/edit";
 
-    private final Grid<Proyecto> grid = new Grid<>(Proyecto.class, false);
+    private final Grid<User> grid = new Grid<>(User.class, false);
 
-    private TextField titulo;
-    private TextArea descripcion;
-    private TextField estado;
-    private DatePicker fechaSolicitud;
+    private TextField nombre;
+    private EmailField email;
+    private ComboBox<String> rol;
 
-    private final Button cancel = new Button("Cancel");
-    private final Button save = new Button("Save");
+    private final Button cancel = new Button("Cancelar");
+    private final Button save = new Button("Guardar");
 
-    private final BeanValidationBinder<Proyecto> binder;
+    private final BeanValidationBinder<User> binder;
 
-    private Proyecto proyecto;
+    private User user;
 
-    private final ProyectoService proyectoService;
+    private final UserService userService;
 
-    public ExplorarProyectosView(ProyectoService proyectoService) {
+    public SearchUsersView(UserService userService) {
 
-        this.proyectoService = proyectoService;
-        addClassNames("explorar-proyectos-view");
+        this.userService = userService;
+        addClassNames("buscar-usuarios-view");
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
@@ -73,75 +73,67 @@ public class ExplorarProyectosView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn("titulo").setHeader("Título").setAutoWidth(true);
-        grid.addColumn("descripcion").setHeader("Descripción").setAutoWidth(true);
-        grid.addColumn("estado").setHeader("Estado").setAutoWidth(true);
-        grid.addColumn("fechaSolicitud").setHeader("Fecha de Solicitud").setAutoWidth(true);
+        grid.addColumn("username").setHeader("Nombre de usuario").setAutoWidth(true);
+        grid.addColumn("email").setHeader("Correo Electrónico").setAutoWidth(true);
+        grid.addColumn("roles").setHeader("Rol").setAutoWidth(true);
 
-        grid.setItems(query -> proyectoService.list(
+        grid.setItems(query -> userService.list(
                         PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
                 .stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
-        // when a row is selected or deselected, populate form
+        // When a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(PROYECTO_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                UI.getCurrent().navigate(String.format(USER_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
             } else {
                 clearForm();
-                UI.getCurrent().navigate(ExplorarProyectosView.class);
+                UI.getCurrent().navigate(SearchUsersView.class);
             }
         });
 
         // Configure Form
-        binder = new BeanValidationBinder<>(Proyecto.class);
+        binder = new BeanValidationBinder<>(User.class);
 
         // Bind fields
         binder.bindInstanceFields(this);
 
         cancel.addClickListener(e -> {
-            clearForm();
-            refreshGrid();
+            // Limpiar los campos de búsqueda
+            nombre.clear();
+            email.clear();
+
+            // Restablecer el Grid con todos los usuarios
+            grid.setItems(userService.searchUsers("", ""));
         });
 
         save.addClickListener(e -> {
-            try {
-                if (this.proyecto == null) {
-                    this.proyecto = new Proyecto();
-                }
-                binder.writeBean(this.proyecto);
-                proyectoService.update(this.proyecto);
-                clearForm();
-                refreshGrid();
-                Notification.show("Proyecto actualizado con éxito");
-                UI.getCurrent().navigate(ExplorarProyectosView.class);
-            } catch (ObjectOptimisticLockingFailureException exception) {
-                Notification n = Notification.show(
-                        "Error al actualizar el proyecto. Otra persona ha modificado el registro.");
-                n.setPosition(Position.MIDDLE);
-                n.addThemeVariants(NotificationVariant.LUMO_ERROR);
-            } catch (ValidationException validationException) {
-                Notification.show("No se pudo actualizar el proyecto. Revisa que los valores sean válidos.");
-            }
+            String nombreValue = nombre.getValue();
+            String emailValue = email.getValue();
+
+            // Filtrar usuarios
+            grid.setItems(userService.searchUsers(nombreValue, emailValue));
         });
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> proyectoId = event.getRouteParameters().get(ProyectoId).map(Long::parseLong);
-        if (proyectoId.isPresent()) {
-            Optional<Proyecto> proyectoFromBackend = proyectoService.get(proyectoId.get());
-            if (proyectoFromBackend.isPresent()) {
-                populateForm(proyectoFromBackend.get());
+        Optional<Long> userId = event.getRouteParameters().get(id).map(Long::parseLong);
+        if (userId.isPresent()) {
+            Optional<User> userFromBackend = userService.get(userId.get());
+            if (userFromBackend.isPresent()) {
+                populateForm(userFromBackend.get());
             } else {
                 Notification.show(
-                        String.format("No se encontró el proyecto solicitado, ID = %s", proyectoId.get()),
+                        String.format("No se encontró el usuario solicitado, ID = %s", userId.get()),
                         3000, Notification.Position.BOTTOM_START);
                 refreshGrid();
-                event.forwardTo(ExplorarProyectosView.class);
+                event.forwardTo(SearchUsersView.class);
             }
         }
     }
+
+
 
     private void createEditorLayout(SplitLayout splitLayout) {
         Div editorLayoutDiv = new Div();
@@ -152,17 +144,18 @@ public class ExplorarProyectosView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
-        titulo = new TextField("Título");
-        descripcion = new TextArea("Descripción");
-        estado = new TextField("Estado");
-        fechaSolicitud = new DatePicker("Fecha de Solicitud");
-        formLayout.add(titulo, descripcion, estado, fechaSolicitud);
+        nombre = new TextField("Nombre");
+        email = new EmailField("Correo Electrónico");
+
+
+        formLayout.add(nombre, email);
 
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
         splitLayout.addToSecondary(editorLayoutDiv);
     }
+
 
     private void createButtonLayout(Div editorLayoutDiv) {
         HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -189,8 +182,10 @@ public class ExplorarProyectosView extends Div implements BeforeEnterObserver {
         populateForm(null);
     }
 
-    private void populateForm(Proyecto value) {
-        this.proyecto = value;
-        binder.readBean(this.proyecto);
+    private void populateForm(User value) {
+        this.user = value;
+        binder.readBean(this.user);
     }
+
+
 }
