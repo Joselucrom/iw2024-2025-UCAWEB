@@ -111,7 +111,7 @@ public class UserService {
 
 
 
-    public List<User> searchUsers(String username, String email, String roles) {
+    public List<User> searchUsers(String username, String email) {
         Specification<User> spec = Specification.where(null);
 
         if (username != null && !username.isEmpty()) {
@@ -122,11 +122,6 @@ public class UserService {
         if (email != null && !email.isEmpty()) {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), "%" + email.toLowerCase() + "%"));
-        }
-
-        if (roles != null && !roles.isEmpty()) {
-            spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("roles")), "%" + roles.toLowerCase() + "%"));
         }
 
         return repository.findAll(spec);

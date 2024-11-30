@@ -73,7 +73,7 @@ public class SearchUsersView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn("username").setHeader("Nombre").setAutoWidth(true);
+        grid.addColumn("username").setHeader("Nombre de usuario").setAutoWidth(true);
         grid.addColumn("email").setHeader("Correo Electrónico").setAutoWidth(true);
         grid.addColumn("roles").setHeader("Rol").setAutoWidth(true);
 
@@ -102,19 +102,17 @@ public class SearchUsersView extends Div implements BeforeEnterObserver {
             // Limpiar los campos de búsqueda
             nombre.clear();
             email.clear();
-            rol.clear();
 
             // Restablecer el Grid con todos los usuarios
-            grid.setItems(userService.searchUsers("", "", ""));
+            grid.setItems(userService.searchUsers("", ""));
         });
 
         save.addClickListener(e -> {
             String nombreValue = nombre.getValue();
             String emailValue = email.getValue();
-            String rolValue = rol.getValue();
 
             // Filtrar usuarios
-            grid.setItems(userService.searchUsers(nombreValue, emailValue, rolValue));
+            grid.setItems(userService.searchUsers(nombreValue, emailValue));
         });
     }
 
@@ -148,14 +146,9 @@ public class SearchUsersView extends Div implements BeforeEnterObserver {
         FormLayout formLayout = new FormLayout();
         nombre = new TextField("Nombre");
         email = new EmailField("Correo Electrónico");
-        rol = new ComboBox<>("Rol");
 
-        // Configurar opciones del ComboBox
-        rol.setItems("ADMIN", "USER", "CIO", "OTP", "PROMOTOR"); // Ajusta según tus roles disponibles
-        rol.setPlaceholder("Selecciona un rol");
-        rol.setClearButtonVisible(true);
 
-        formLayout.add(nombre, email, rol);
+        formLayout.add(nombre, email);
 
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
