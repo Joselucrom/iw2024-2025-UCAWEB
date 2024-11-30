@@ -1,6 +1,7 @@
 package uca.es.iw.services;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.persistence.ElementCollection;
@@ -18,8 +19,6 @@ import uca.es.iw.data.Role;
 
 @Service
 public class UserService {
-
-
 
     private final UserRepository repository;
 
@@ -53,6 +52,8 @@ public class UserService {
     public int count() {
         return (int) repository.count();
     }
+
+
 
 
     public User createUser(String name, String username, String rawPassword, String email, byte[] profilePicture, String role) {
@@ -106,5 +107,28 @@ public class UserService {
         if (role == null) {
             throw new IllegalArgumentException("Debe seleccionar un rol válido.");
         }
+    }
+
+
+
+    public List<User> searchUsers(String username, String email, String roles) {
+        Specification<User> spec = Specification.where(null);
+
+        if (username != null && !username.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("username")), "%" + username.toLowerCase() + "%"));
+        }
+
+        if (email != null && !email.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), "%" + email.toLowerCase() + "%"));
+        }
+
+        if (roles != null && !roles.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("roles")), "%" + roles.toLowerCase() + "%"));
+        }
+
+        return repository.findAll(spec);
     }
 }
