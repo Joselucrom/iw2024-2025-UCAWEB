@@ -4,8 +4,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+import com.vaadin.flow.component.notification.Notification;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.FetchType;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -69,25 +71,7 @@ public class UserService {
         user.setEmail(email);
         user.setProfilePicture(profilePicture);
 
-        switch (role) {
-            case "ADMIN":
-                user.setRoles(Set.of(Role.ADMIN, Role.USER, Role.CIO, Role.PROMOTOR));
-                break;
-            case "USER":
-                user.setRoles(Set.of(Role.USER));
-                break;
-            case "OTP":
-                user.setRoles(Set.of(Role.OTP, Role.USER));
-                break;
-            case "CIO":
-                user.setRoles(Set.of(Role.CIO, Role.USER));
-                break;
-            case "PROMOTOR":
-                user.setRoles(Set.of(Role.PROMOTOR, Role.USER));
-                break;
-            default:
-                break;
-        }
+        roleSetter(user, role);
         return repository.save(user);
     }
 
@@ -109,6 +93,23 @@ public class UserService {
         }
     }
 
+    private void validateUpdateData(String name, String username, String password, String email) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre no puede estar vacío.");
+        }
+        if (username == null || username.trim().isEmpty() || username.contains(" ")) {
+            throw new IllegalArgumentException("El nombre de usuario no puede estar vacío ni contener espacios.");
+        }
+        if (password != null) {
+            if (password.length() < 8) {
+                throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres.");
+            }
+        }
+        if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new IllegalArgumentException("El correo electrónico no tiene un formato válido.");
+        }
+    }
+
 
 
     public List<User> searchUsers(String username, String email) {
@@ -126,4 +127,62 @@ public class UserService {
 
         return repository.findAll(spec);
     }
+
+    public void updateUser(Long id, String name, String username, String password, String email, byte[] profilePicture, String role) {
+        validateUpdateData(name, username, password, email);
+        User user = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        user.setName(name);
+        user.setUsername(username);
+        user.setEmail(email);
+        if (password != null) {
+            user.setHashedPassword(passwordEncoder.encode(password));
+        }
+        if (profilePicture != null) {
+            user.setProfilePicture(profilePicture);
+        }
+        if (role != null) {
+            deleteRoles(id);
+            roleSetter(user, role);
+        }
+
+
+        repository.save(user);
+    }
+
+    public void roleSetter (User user, String role) {
+        switch (role) {
+            case "ADMIN":
+                user.setRoles(Set.of(Role.ADMIN, Role.USER, Role.CIO, Role.PROMOTOR));
+                break;
+            case "USER":
+                user.setRoles(Set.of(Role.USER));
+                break;
+            case "OTP":
+                user.setRoles(Set.of(Role.OTP, Role.USER));
+                break;
+            case "CIO":
+                user.setRoles(Set.of(Role.CIO, Role.USER));
+                break;
+            case "PROMOTOR":
+                user.setRoles(Set.of(Role.PROMOTOR, Role.USER));
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Transactional
+    public void deleteRoles(Long userId) {
+        Optional<User> optionalUser = repository.findById(userId);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.getRoles().clear(); // Limpia todos los roles
+            //repository.save(user); // Guarda los cambios
+        } else {
+            throw new IllegalArgumentException("El usuario con ID " + userId + " no existe.");
+        }
+    }
+
+
 }

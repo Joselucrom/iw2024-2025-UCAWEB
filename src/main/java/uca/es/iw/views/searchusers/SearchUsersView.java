@@ -9,6 +9,7 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
@@ -20,6 +21,7 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
@@ -28,15 +30,17 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import jakarta.annotation.security.PermitAll;
 import java.util.Optional;
+
+import jakarta.annotation.security.RolesAllowed;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import uca.es.iw.data.User;
 import uca.es.iw.services.UserService;
 
 @PageTitle("Buscar Usuarios")
-@Route("buscar-usuarios/:userID?/:action?(edit)")
+@Route("search-users/:userID?/:action?(edit)")
 @Menu(order = 5, icon = "line-awesome/svg/user-solid.svg")
-@PermitAll
+@RolesAllowed("ADMIN")
 @Uses(Icon.class)
 public class SearchUsersView extends Div implements BeforeEnterObserver {
 
@@ -73,7 +77,17 @@ public class SearchUsersView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn("username").setHeader("Nombre de usuario").setAutoWidth(true);
+        //grid.addColumn("username").setHeader("Nombre de usuario").setAutoWidth(true);
+        grid.addColumn(new ComponentRenderer<>(user -> {
+            if (user instanceof User) { // Extra seguridad para evitar errores de inferencia.
+                Anchor anchor = new Anchor(String.format("modify-user/%s", ((User) user).getId()), user.getUsername());
+                anchor.getElement().setAttribute("theme", "tertiary");
+                return anchor;
+            }
+            return null; // En caso de que no sea un usuario válido.
+        })).setHeader("Nombre de usuario").setAutoWidth(true);
+
+
         grid.addColumn("email").setHeader("Correo Electrónico").setAutoWidth(true);
         grid.addColumn("roles").setHeader("Rol").setAutoWidth(true);
 
