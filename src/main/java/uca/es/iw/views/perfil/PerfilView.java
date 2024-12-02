@@ -39,8 +39,7 @@ public class PerfilView extends VerticalLayout {
     private final PasswordField password = new PasswordField("Nueva contraseña");
     private final Image profilePicture = new Image();
     private final Upload imageUpload;
-
-    private byte[] uploadedImage; // Para guardar la imagen subida
+    private byte[] uploadedImage;
 
     public PerfilView(AuthenticatedUser authenticatedUser, UserService userService, PasswordEncoder passwordEncoder) {
         this.authenticatedUser = authenticatedUser;
@@ -50,13 +49,11 @@ public class PerfilView extends VerticalLayout {
         Optional<User> maybeUser = authenticatedUser.get();
         if (maybeUser.isPresent()) {
             User user = maybeUser.get();
-
             // Configurar campos
-            username.setValue(user.getUsername()); // Alias de usuario
-            fullName.setValue(user.getName()); // Nombre completo
+            username.setValue(user.getUsername());
+            fullName.setValue(user.getName());
             roles.setValue(user.getRoles().toString());
-            roles.setReadOnly(true); // El rol es solo informativo
-
+            roles.setReadOnly(true);
             // Configurar imagen de perfil
             if (user.getProfilePicture() != null && user.getProfilePicture().length > 0) {
                 profilePicture.setSrc(new StreamResource("profile-pic",
@@ -67,7 +64,6 @@ public class PerfilView extends VerticalLayout {
             profilePicture.setWidth("150px");
             profilePicture.setHeight("150px");
         }
-
         // Configurar la carga de imagen con MemoryBuffer
         MemoryBuffer buffer = new MemoryBuffer();
         imageUpload = new Upload(buffer);
@@ -82,47 +78,42 @@ public class PerfilView extends VerticalLayout {
                 Notification.show("Error al cargar la imagen: " + e.getMessage());
             }
         });
-
-        // Evitar el autocompletado del campo de contraseña nueva
         password.getElement().setAttribute("autocomplete", "new-password");
-
-        // Botón para guardar cambios
         Button saveButton = new Button("Guardar cambios", event -> {
+            // Validar campos antes de guardar
+            if (!validarCampos()) {
+                return; // Si la validación falla, se detiene la ejecución.
+            }
             maybeUser.ifPresent(user -> {
-                // Actualizar nombre completo
-                user.setName(fullName.getValue()); // Actualiza el nombre completo
-
-                // Actualizar nombre de usuario
+                // Actualizar nombre completo solo si no está vacío
+                String newFullName = fullName.getValue();
+                if (!newFullName.isEmpty()) {
+                    user.setName(newFullName);
+                }
+                // Actualizar nombre de usuario solo si no está vacío y es diferente
                 String newUsername = username.getValue();
                 if (!newUsername.isEmpty() && !newUsername.equals(user.getUsername())) {
                     user.setUsername(newUsername);
                 }
-
                 // Solo actualizamos la contraseña si se ha modificado
                 if (!password.getValue().isEmpty()) {
                     String hashedPassword = encriptarContraseña(password.getValue());
                     user.setHashedPassword(hashedPassword);
                 }
-
                 // Actualizar imagen si se ha subido
                 if (uploadedImage != null) {
-                    user.setProfilePicture(uploadedImage); // Guardar los bytes directamente en el campo MEDIUMBLOB
+                    user.setProfilePicture(uploadedImage);
                 }
-
                 // Guardar cambios en la base de datos
                 userService.updateUserData(user);
                 Notification.show("Perfil actualizado correctamente.");
-
                 // Actualizar el contexto de autenticación para reflejar el cambio de nombre de usuario
                 authenticatedUser.setUsername(user);
-
                 // Actualizar la página para reflejar los cambios
                 getUI().ifPresent(ui -> ui.getPage().reload());
             });
         });
-
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-
         // Diseño
         setWidth("100%");
         setAlignItems(Alignment.CENTER);
@@ -131,12 +122,21 @@ public class PerfilView extends VerticalLayout {
         fullName.setWidth("100%");
         password.setWidth("100%");
         roles.setWidth("100%");
-
         // Agregar componentes al layout
         add(username, fullName, roles, password, profilePicture, imageUpload, saveButton);
     }
-
+    public boolean validarCampos() {
+        if (username == null || username.getValue().isEmpty()) {
+            Notification.show("El campo 'Nombre de usuario' no puede estar vacío.");
+            return false;
+        }
+        if (fullName == null || fullName.getValue().isEmpty()) {
+            Notification.show("El campo 'Nombre completo' no puede estar vacío.");
+            return false;
+        }
+        return true;
+    }
     private String encriptarContraseña(String password) {
-        return passwordEncoder.encode(password); // Encriptar la contraseña
+        return passwordEncoder.encode(password);
     }
 }
