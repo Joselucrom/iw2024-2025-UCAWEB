@@ -79,6 +79,8 @@ public class RegisterUserView extends Composite<VerticalLayout> implements Befor
                 emailField.getValue()
         ));
 
+
+
         // Diseño principal
         formLayout.add(nameField, usernameField, passwordField, emailField);
         layoutColumn2.add(h3, formLayout, avatar, upload, saveButton);

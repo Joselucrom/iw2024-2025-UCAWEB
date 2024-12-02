@@ -6,10 +6,13 @@ import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
@@ -48,6 +51,7 @@ public class ModifyUserView extends Composite<VerticalLayout> implements BeforeE
 
         VerticalLayout layoutColumn2 = new VerticalLayout();
         H3 h3 = new H3("Modificar información del usuario");
+        HorizontalLayout layoutRow = new HorizontalLayout();
 
         // Formulario
         FormLayout formLayout = new FormLayout();
@@ -68,13 +72,55 @@ public class ModifyUserView extends Composite<VerticalLayout> implements BeforeE
         Upload upload = getUpload();
 
         // Botón para guardar
-        Button saveButton = new Button("Guardar");
+        Button saveButton = new Button("Actualizar usuario");
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         saveButton.addClickListener(event -> saveUser());
 
+        Button deleteButton = new Button("Borrar usuario");
+        deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+        // Crear el diálogo de confirmación
+        Dialog confirmDialog = new Dialog();
+        confirmDialog.setHeaderTitle("Confirmar eliminación");
+
+        // Mensaje en el diálogo
+        Div message = new Div();
+        message.setText("¿Estás seguro de que deseas eliminar este usuario?");
+        confirmDialog.add(message);
+
+        // Botón "Cancelar"
+        Button cancelButton = new Button("Cancelar", e -> confirmDialog.close());
+        cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+
+        // Botón "Eliminar"
+        Button confirmButton = new Button("Eliminar", e -> {
+            try {
+                userService.delete(userId); // Llama al método de eliminación
+                Notification.show("Usuario eliminado con éxito.", 3000, Notification.Position.MIDDLE);
+                UI.getCurrent().navigate("search-users");
+            } catch (Exception ex) {
+                Notification.show("Error al eliminar el usuario: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            } finally {
+                confirmDialog.close();
+            }
+        });
+        confirmButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
+
+        // Añadir botones al diálogo
+        HorizontalLayout dialogButtons = new HorizontalLayout(cancelButton, confirmButton);
+        confirmDialog.getFooter().add(dialogButtons);
+
+        // Configurar evento para abrir el diálogo
+        deleteButton.addClickListener(event -> confirmDialog.open());
+
+
+
         // Diseño principal
         formLayout.add(nameField, usernameField, passwordField, roleComboBox, emailField);
-        layoutColumn2.add(h3, formLayout, avatar, upload, saveButton);
+        layoutRow.add(saveButton, deleteButton);
+        layoutColumn2.add(h3, formLayout, avatar, upload, layoutRow);
+
+
 
         getContent().add(layoutColumn2);
         getContent().setAlignItems(Alignment.CENTER);

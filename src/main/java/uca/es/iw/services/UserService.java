@@ -184,5 +184,18 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public void deleteUser(Long userId) {
+        Optional<User> optionalUser = repository.findById(userId);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.getRoles().clear(); // Limpia los roles asociados al usuario
+            repository.delete(user); // Elimina el usuario
+        } else {
+            throw new IllegalArgumentException("El usuario con ID " + userId + " no existe.");
+        }
+    }
+
+
 
 }
