@@ -76,18 +76,6 @@ public class ModifyUserView extends Composite<VerticalLayout> implements BeforeE
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         saveButton.addClickListener(event -> saveUser());
 
-        /*Button deleteButton = new Button("Borrar usuario");
-        deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        deleteButton.addClickListener(event -> {
-            try{
-                userService.delete(userId);
-                Notification.show("Usuario eliminado con éxito.", 3000, Notification.Position.MIDDLE);
-                UI.getCurrent().navigate("search-users");
-            } catch (Exception e) {
-                Notification.show("Error al eliminar el usuario: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
-            }
-        });*/
-
         Button deleteButton = new Button("Borrar usuario");
         deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
