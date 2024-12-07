@@ -3,6 +3,7 @@ package uca.es.iw.views;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -13,19 +14,25 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+
 import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+
 import uca.es.iw.data.User;
 import uca.es.iw.security.AuthenticatedUser;
 
@@ -37,9 +44,8 @@ import uca.es.iw.security.AuthenticatedUser;
 public class MainLayout extends AppLayout {
 
     private H1 viewTitle;
-
-    private AuthenticatedUser authenticatedUser;
-    private AccessAnnotationChecker accessChecker;
+    private final AuthenticatedUser authenticatedUser;
+    private final AccessAnnotationChecker accessChecker;
 
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
         this.authenticatedUser = authenticatedUser;
@@ -48,6 +54,7 @@ public class MainLayout extends AppLayout {
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
         addHeaderContent();
+        addLanguageSwitcher(); // Añadimos los botones de cambio de idioma
     }
 
     private void addHeaderContent() {
@@ -111,13 +118,17 @@ public class MainLayout extends AppLayout {
             div.getElement().getStyle().set("align-items", "center");
             div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
             userName.add(div);
-            userName.getSubMenu().addItem("Ver perfil", e -> {
+
+            // Obtener las traducciones para "Ver perfil" y "Cerrar sesión"
+            String viewProfileText = getTranslation("menu.viewProfile");
+            String logoutText = getTranslation("menu.logout");
+            // Usar las traducciones
+            userName.getSubMenu().addItem(viewProfileText, e -> {
                 getUI().ifPresent(ui -> ui.navigate("perfil"));
             });
-            userName.getSubMenu().addItem("Sign out", e -> {
+            userName.getSubMenu().addItem(logoutText, e -> {
                 authenticatedUser.logout();
             });
-
             layout.add(userMenu);
         } else {
             Anchor loginLink = new Anchor("login", "Sign in");
@@ -127,13 +138,69 @@ public class MainLayout extends AppLayout {
         return layout;
     }
 
+    private void addLanguageSwitcher() {
+        // Obtener las traducciones para los botones de idioma
+        String languageText = getTranslation("menu.language");
+        String spanishText = getTranslation("menu.spanish");
+        String englishText = getTranslation("menu.english");
+
+        // Crear el MenuBar para los idiomas
+        MenuBar languageMenu = new MenuBar();
+
+        // Crear el "MenuItem" que servirá como el botón principal del menú con el icono de flecha hacia abajo
+        MenuItem languageMenuItem = languageMenu.addItem(languageText);
+
+        // Añadir un icono de flecha hacia abajo al "MenuItem"
+        languageMenuItem.getElement().appendChild(new Icon("lumo", "dropdown").getElement());
+
+        // Crear los ítems del submenú para cambiar el idioma
+        languageMenuItem.getSubMenu().addItem(spanishText, e -> switchLanguage(new Locale("es")));
+        languageMenuItem.getSubMenu().addItem(englishText, e -> switchLanguage(new Locale("en")));
+
+        // Añadir el MenuBar a la barra de navegación
+        HorizontalLayout languageSwitcher = new HorizontalLayout(languageMenu);
+        languageSwitcher.setPadding(true);
+        languageSwitcher.getStyle().set("margin-left", "auto"); // Alinea los botones a la derecha
+        addToNavbar(languageSwitcher);
+
+        // Establecer el idioma predeterminado al cargar la página
+        Locale currentLocale = VaadinSession.getCurrent().getLocale();
+        if (currentLocale == null) {
+            // Si no hay un idioma en la sesión, establecer inglés como predeterminado
+            VaadinSession.getCurrent().setLocale(Locale.ENGLISH);
+        }
+    }
+
+
+    private void switchLanguage(Locale locale) {
+        VaadinSession.getCurrent().setLocale(locale);
+        VaadinService.getCurrentRequest().getWrappedSession().setAttribute("locale", locale);
+
+        // Asegurarse de recargar la UI
+        getUI().ifPresent(ui -> ui.access(() -> {
+            ui.getPage().reload();
+        }));
+    }
+
     @Override
     protected void afterNavigation() {
         super.afterNavigation();
-        viewTitle.setText(getCurrentPageTitle());
+
+        // Obtener el título dinámico desde la vista actual
+        String pageTitle = getTranslation(getCurrentPageTitle());
+        viewTitle.setText(pageTitle);
+        getUI().ifPresent(ui -> ui.getPage().setTitle(pageTitle));
     }
 
     private String getCurrentPageTitle() {
-        return MenuConfiguration.getPageHeader(getContent()).orElse("");
+        // Usa un método en las vistas para proporcionar claves de traducción
+        String className = getContent().getClass().getSimpleName();
+        switch (className) {
+            case "PerfilView":
+                return "perfil.titulo";
+            default:
+                return "app.default_title"; // Título predeterminado
+        }
     }
+
 }

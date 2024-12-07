@@ -2,6 +2,7 @@ package uca.es.iw.views.perfil;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -9,14 +10,16 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import jakarta.annotation.security.RolesAllowed;
+import org.springframework.beans.factory.annotation.Autowired;
 import uca.es.iw.security.AuthenticatedUser;
 import uca.es.iw.data.User;
 import uca.es.iw.services.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import uca.es.iw.views.MainLayout;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,37 +27,38 @@ import java.io.InputStream;
 import java.util.Optional;
 
 @Route(value = "perfil", layout = uca.es.iw.views.MainLayout.class)
-@PageTitle("Perfil de Usuario")
 @RolesAllowed("USER")
 public class PerfilView extends VerticalLayout {
 
     private final AuthenticatedUser authenticatedUser;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final I18NProvider i18nProvider;
 
     // Campos del formulario
-    private final TextField username = new TextField("Nombre de usuario");
-    private final TextField fullName = new TextField("Nombre completo");
-    private final TextField roles = new TextField("Rol de usuario");
-    private final PasswordField password = new PasswordField("Nueva contraseña");
+    private final TextField username = new TextField();
+    private final TextField fullName = new TextField();
+    private final TextField roles = new TextField();
+    private final PasswordField password = new PasswordField();
     private final Image profilePicture = new Image();
     private final Upload imageUpload;
     private byte[] uploadedImage;
-
-    public PerfilView(AuthenticatedUser authenticatedUser, UserService userService, PasswordEncoder passwordEncoder) {
+    @Autowired
+    public PerfilView(AuthenticatedUser authenticatedUser, UserService userService, PasswordEncoder passwordEncoder, I18NProvider i18nProvider) {
         this.authenticatedUser = authenticatedUser;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
-
+        this.i18nProvider = i18nProvider;
+        // Establecer el título de la página, que luego se pasará al MainLayout
+        getUI().ifPresent(ui -> ui.getPage().setTitle(i18nProvider.getTranslation("perfil.titulo", getLocale())));
+        // Configurar campos iniciales
         Optional<User> maybeUser = authenticatedUser.get();
         if (maybeUser.isPresent()) {
             User user = maybeUser.get();
-            // Configurar campos
             username.setValue(user.getUsername());
             fullName.setValue(user.getName());
             roles.setValue(user.getRoles().toString());
             roles.setReadOnly(true);
-            // Configurar imagen de perfil
             if (user.getProfilePicture() != null && user.getProfilePicture().length > 0) {
                 profilePicture.setSrc(new StreamResource("profile-pic",
                         () -> new ByteArrayInputStream(user.getProfilePicture())));
@@ -64,7 +68,7 @@ public class PerfilView extends VerticalLayout {
             profilePicture.setWidth("150px");
             profilePicture.setHeight("150px");
         }
-        // Configurar la carga de imagen con MemoryBuffer
+        // Configurar la carga de imágenes
         MemoryBuffer buffer = new MemoryBuffer();
         imageUpload = new Upload(buffer);
         imageUpload.setAcceptedFileTypes("image/jpeg", "image/png");
@@ -73,65 +77,55 @@ public class PerfilView extends VerticalLayout {
                 uploadedImage = inputStream.readAllBytes();
                 profilePicture.setSrc(new StreamResource("profile-pic",
                         () -> new ByteArrayInputStream(uploadedImage)));
-                Notification.show("Imagen cargada correctamente.");
+                Notification.show(i18nProvider.getTranslation("perfil.imagen_cargada", getLocale()));
             } catch (IOException e) {
-                Notification.show("Error al cargar la imagen: " + e.getMessage());
+                Notification.show(i18nProvider.getTranslation("perfil.error_imagen", getLocale(), e.getMessage()));
             }
         });
         password.getElement().setAttribute("autocomplete", "new-password");
-        Button saveButton = new Button("Guardar cambios", event -> {
-            // Validar campos antes de guardar
-            if (!validarCampos()) {
-                return; // Si la validación falla, se detiene la ejecución.
+        // Botón para guardar cambios
+        Button saveButton = new Button(i18nProvider.getTranslation("perfil.guardar_cambios", getLocale()), event -> {
+            if (!validarCampos(i18nProvider)) {
+                return;
             }
             maybeUser.ifPresent(user -> {
-                // Actualizar nombre completo solo si no está vacío
-                String newFullName = fullName.getValue();
-                if (!newFullName.isEmpty()) {
-                    user.setName(newFullName);
-                }
-                // Actualizar nombre de usuario solo si no está vacío y es diferente
-                String newUsername = username.getValue();
-                if (!newUsername.isEmpty() && !newUsername.equals(user.getUsername())) {
-                    user.setUsername(newUsername);
-                }
-                // Solo actualizamos la contraseña si se ha modificado
+                // Actualizar los datos del usuario
+                user.setName(fullName.getValue());
+                user.setUsername(username.getValue());
                 if (!password.getValue().isEmpty()) {
-                    String hashedPassword = encriptarContraseña(password.getValue());
-                    user.setHashedPassword(hashedPassword);
+                    user.setHashedPassword(encriptarContraseña(password.getValue()));
                 }
-                // Actualizar imagen si se ha subido
                 if (uploadedImage != null) {
                     user.setProfilePicture(uploadedImage);
                 }
-                // Guardar cambios en la base de datos
                 userService.updateUserData(user);
-                Notification.show("Perfil actualizado correctamente.");
-                // Actualizar el contexto de autenticación para reflejar el cambio de nombre de usuario
-                authenticatedUser.setUsername(user);
-                // Actualizar la página para reflejar los cambios
+
+                // Reautenticar al usuario con los datos actualizados
+                authenticatedUser.reauthenticate(user);
+
+                Notification.show(i18nProvider.getTranslation("perfil.perfil_actualizado", getLocale()));
                 getUI().ifPresent(ui -> ui.getPage().reload());
             });
         });
+
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        // Etiquetas de los campos con traducción
+        username.setLabel(i18nProvider.getTranslation("perfil.nombre_usuario", getLocale()));
+        fullName.setLabel(i18nProvider.getTranslation("perfil.nombre_completo", getLocale()));
+        roles.setLabel(i18nProvider.getTranslation("perfil.rol_usuario", getLocale()));
+        password.setLabel(i18nProvider.getTranslation("perfil.nueva_contrasena", getLocale()));
         // Diseño
         setWidth("100%");
         setAlignItems(Alignment.CENTER);
-
         username.setWidth("100%");
         fullName.setWidth("100%");
         password.setWidth("100%");
         roles.setWidth("100%");
-        // Agregar componentes al layout
         add(username, fullName, roles, password, profilePicture, imageUpload, saveButton);
     }
-    public boolean validarCampos() {
-        if (username == null || username.getValue().isEmpty()) {
-            Notification.show("El campo 'Nombre de usuario' no puede estar vacío.");
-            return false;
-        }
-        if (fullName == null || fullName.getValue().isEmpty()) {
-            Notification.show("El campo 'Nombre completo' no puede estar vacío.");
+    private boolean validarCampos(I18NProvider i18nProvider) {
+        if (username.getValue().isEmpty() || fullName.getValue().isEmpty()) {
+            Notification.show(i18nProvider.getTranslation("perfil.campos_invalidos", getLocale()));
             return false;
         }
         return true;
