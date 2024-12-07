@@ -1,7 +1,6 @@
 package uca.es.iw.security;
 
 import com.vaadin.flow.spring.security.AuthenticationContext;
-import java.util.Optional;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,7 +8,7 @@ import uca.es.iw.data.User;
 import uca.es.iw.data.UserRepository;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import com.vaadin.flow.component.UI;
+import java.util.Optional;
 
 @Component
 public class AuthenticatedUser {
@@ -32,8 +31,8 @@ public class AuthenticatedUser {
         authenticationContext.logout();
     }
 
-    public void setUsername(User user) {
-        // Crear un UserDetails actualizado con los roles correctos
+    public void reauthenticate(User user) {
+        // Crear un nuevo UserDetails actualizado
         UserDetails updatedUserDetails = org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
                 .password(user.getHashedPassword())
@@ -47,9 +46,5 @@ public class AuthenticatedUser {
                 new UsernamePasswordAuthenticationToken(updatedUserDetails, null, updatedUserDetails.getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
-        // Actualizar la sesión de Vaadin
-        UI.getCurrent().getSession().setAttribute(User.class, user);
-        UI.getCurrent().getPage().reload();
     }
 }
