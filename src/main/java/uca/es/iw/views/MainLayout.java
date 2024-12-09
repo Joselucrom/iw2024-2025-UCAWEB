@@ -106,20 +106,19 @@ public class MainLayout extends AppLayout {
             // Determinar la clave de traducción según la ruta o clase de vista
             String translationKey = switch (entry.title()) {
                 case "WelcomeView" -> "welcome.title";
-                default -> "app.default_title"; // Traducción predeterminada
+                default -> null; // No asigna clave de traducción predeterminada
             };
-
-            // Obtener el título traducido
-            String translatedTitle = getTranslation(translationKey);
-
-            // Crear la entrada del menú con el título traducido
+            // Si hay una clave de traducción, intenta obtener la traducción; de lo contrario, usa el título original
+            String translatedTitle = (translationKey != null)
+                    ? getTranslation(translationKey)
+                    : entry.title();
+            // Crear la entrada del menú con el título traducido o el título original
             if (entry.icon() != null) {
                 nav.addItem(new SideNavItem(translatedTitle, entry.path(), new SvgIcon(entry.icon())));
             } else {
                 nav.addItem(new SideNavItem(translatedTitle, entry.path()));
             }
         });
-
         return nav;
     }
 
