@@ -15,7 +15,13 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @Route("")
 @Menu(order = 0, icon = "line-awesome/svg/user.svg")
 @AnonymousAllowed
+
+
+
+
+
 public class WelcomeView extends VerticalLayout {
+
 
     public WelcomeView() {
         // Configuración del layout principal
@@ -75,7 +81,7 @@ public class WelcomeView extends VerticalLayout {
                 .set("display", "flex")
                 .set("align-items", "center")
                 .set("justify-content", "center");
-        icon.add(new Paragraph("📌")); // Puedes cambiar esto por un ícono más apropiado
+        icon.add(new Paragraph("📌"));
 
         Paragraph stepText = new Paragraph(text);
         stepText.getStyle().set("margin", "0").set("font-weight", "bold");

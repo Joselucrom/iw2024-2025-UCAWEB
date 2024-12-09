@@ -3,6 +3,7 @@ package uca.es.iw.views;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Anchor;
@@ -27,6 +28,8 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import com.vaadin.flow.component.html.Image;
+
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -55,17 +58,35 @@ public class MainLayout extends AppLayout {
         addDrawerContent();
         addHeaderContent();
         addLanguageSwitcher(); // Añadimos los botones de cambio de idioma
+        addGlobalFooter(); // Añade el footer global fijo
+        adjustContentForFooter(); // Ajusta el contenido para el footer
     }
 
     private void addHeaderContent() {
         DrawerToggle toggle = new DrawerToggle();
         toggle.setAriaLabel("Menu toggle");
 
-        viewTitle = new H1();
+        // Agregar un logo
+        Image logo = new Image("images/uca-logo.png", "UCA Logo");
+        logo.setHeight("40px"); // Ajusta el tamaño del logo
+
+        // Estilo del título
+        viewTitle = new H1("Universidad de Cádiz");
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
-        addToNavbar(true, toggle, viewTitle);
+        // Crear un contenedor horizontal para el header
+        HorizontalLayout headerLayout = new HorizontalLayout(toggle, logo, viewTitle);
+        headerLayout.setAlignItems(Alignment.CENTER);
+        headerLayout.setWidthFull();
+        headerLayout.getStyle()
+                .set("background-color", "#003366")
+                .set("color", "white")
+                .set("padding", "10px");
+
+        addToNavbar(headerLayout);
     }
+
+
 
     private void addDrawerContent() {
         Span appName = new Span("IW");
@@ -119,16 +140,11 @@ public class MainLayout extends AppLayout {
             div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
             userName.add(div);
 
-            // Obtener las traducciones para "Ver perfil" y "Cerrar sesión"
             String viewProfileText = getTranslation("menu.viewProfile");
             String logoutText = getTranslation("menu.logout");
-            // Usar las traducciones
-            userName.getSubMenu().addItem(viewProfileText, e -> {
-                getUI().ifPresent(ui -> ui.navigate("perfil"));
-            });
-            userName.getSubMenu().addItem(logoutText, e -> {
-                authenticatedUser.logout();
-            });
+            userName.getSubMenu().addItem(viewProfileText, e -> getUI().ifPresent(ui -> ui.navigate("perfil")));
+            userName.getSubMenu().addItem(logoutText, e -> authenticatedUser.logout());
+
             layout.add(userMenu);
         } else {
             Anchor loginLink = new Anchor("login", "Sign in");
@@ -138,6 +154,35 @@ public class MainLayout extends AppLayout {
         return layout;
     }
 
+    private void addGlobalFooter() {
+        // Crear el footer global
+        Footer globalFooter = new Footer();
+        globalFooter.getStyle()
+                .set("background-color", "#003366") // Mismo color que el header
+                .set("color", "white")
+                .set("text-align", "center")
+                .set("padding", "10px")
+                .set("position", "fixed") // Fija el footer al fondo
+                .set("bottom", "0")
+                .set("width", "100%");
+        globalFooter.add(new Span("© 2024 Universidad de Cádiz - Todos los derechos reservados."));
+
+        // Crear un contenedor para el footer fuera del drawer
+        Div footerContainer = new Div(globalFooter);
+        footerContainer.getStyle()
+                .set("z-index", "100") // Asegúrate de que esté por encima del contenido
+                .set("width", "100%");
+
+        // Añade el contenedor al final del MainLayout
+        getElement().appendChild(footerContainer.getElement());
+    }
+
+
+    private void adjustContentForFooter() {
+        getElement().getStyle().set("padding-bottom", "50px"); // Altura del footer
+    }
+
+
     private void addLanguageSwitcher() {
         // Obtener las traducciones para los botones de idioma
         String languageText = getTranslation("menu.language");
@@ -146,11 +191,14 @@ public class MainLayout extends AppLayout {
 
         // Crear el MenuBar para los idiomas
         MenuBar languageMenu = new MenuBar();
+        languageMenu.setThemeName("tertiary-inline contrast"); // Tema más limpio
+        languageMenu.getStyle()
+                .set("background-color", "#FFFFFFFF")
+                .set("color", "white")
+                .set("border", "none"); // Sin bordes
 
         // Crear el "MenuItem" que servirá como el botón principal del menú con el icono de flecha hacia abajo
         MenuItem languageMenuItem = languageMenu.addItem(languageText);
-
-        // Añadir un icono de flecha hacia abajo al "MenuItem"
         languageMenuItem.getElement().appendChild(new Icon("lumo", "dropdown").getElement());
 
         // Crear los ítems del submenú para cambiar el idioma
@@ -160,16 +208,18 @@ public class MainLayout extends AppLayout {
         // Añadir el MenuBar a la barra de navegación
         HorizontalLayout languageSwitcher = new HorizontalLayout(languageMenu);
         languageSwitcher.setPadding(true);
-        languageSwitcher.getStyle().set("margin-left", "auto"); // Alinea los botones a la derecha
+        languageSwitcher.getStyle()
+                .set("margin-left", "auto") // Alinea los botones a la derecha
+                .set("background-color", "#FFFFFFFFF");
         addToNavbar(languageSwitcher);
 
         // Establecer el idioma predeterminado al cargar la página
         Locale currentLocale = VaadinSession.getCurrent().getLocale();
         if (currentLocale == null) {
-            // Si no hay un idioma en la sesión, establecer inglés como predeterminado
             VaadinSession.getCurrent().setLocale(Locale.ENGLISH);
         }
     }
+
 
 
     private void switchLanguage(Locale locale) {
