@@ -124,11 +124,6 @@ public class AddUserView extends Composite<VerticalLayout> {
     }
 
     private void saveUser(String name, String username, String password, String role, String email) {
-        /*if (name.isEmpty() || username.isEmpty() || password.isEmpty() || role == null || email.isEmpty()) {
-            Notification.show("Por favor, complete todos los campos.", 3000, Notification.Position.MIDDLE);
-            return;
-        }*/
-
         try {
             userService.createUser(name, username, password, email, profilePictureData, role);
             Notification.show("Usuario guardado con éxito.", 3000, Notification.Position.MIDDLE);
