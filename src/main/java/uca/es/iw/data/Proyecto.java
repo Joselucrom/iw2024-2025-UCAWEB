@@ -1,310 +1,334 @@
 package uca.es.iw.data;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Set;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
 public class Proyecto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ProyectoId;
+    private Long Id_proyecto;
 
-    @Column(name = "titulo_proyecto", nullable = false, length = 255)
+    @Column(name = "titulo", nullable = false, length = 60)
     private String titulo;
 
-    @Column(name = "descripcion_proyecto", nullable = false, columnDefinition = "TEXT")
-    private String descripcion;
+    @Column(name = "nombre_corto", nullable = false, length = 15)
+    private String nombreCorto;
 
-    @Column(name = "justificacion_proyecto", nullable = false, columnDefinition = "TEXT")
-    private String justificacion;
+    @Lob
+    @Column(name = "memoria", nullable = false, columnDefinition="MEDIUMBLOB")
+    private byte[] memoria;
 
-    @Column(name = "metas_objetivo", nullable = false, columnDefinition = "TEXT")
-    private String metasObjetivo;
-
-    @Column(name = "impacto_esperado", nullable = false, columnDefinition = "TEXT")
-    private String impactoEsperado;
-
-    @Column(name = "comentarios_adicionales", columnDefinition = "TEXT")
-    private String ComentariosAdicionales;
-
-    @Column(name = "alcance_proyecto", nullable = false, columnDefinition = "TEXT")
-    private String alcance;
-
-    @Column(name = "requisitos_funcionales", nullable = false, columnDefinition = "TEXT")
-    private String requisitosFuncionales;
-
-    @Column(name = "requisitos_no_funcionales", nullable = false, columnDefinition = "TEXT")
-    private String requisitosNoFuncionales;
-
-    @Column(name = "estado", nullable = false)
-    private String estado; // Este campo es un String, pero representará un ENUM en la base de datos
-
-    //@Enumerated(EnumType.STRING)
-    //@ElementCollection(fetch = FetchType.EAGER)
-    //private Set<Estado> estados;
-
-    @Column(name = "nombre_solicitante", length = 100)
+    @Column(name = "nombre_solicitante", nullable = false, length = 60)
     private String nombreSolicitante;
 
-    @Column(name = "correo_solicitante", length = 100)
+    @Column(name = "correo_solicitante", nullable = false, length = 100)
     private String correoSolicitante;
 
-    @Column(name = "rol_solicitante", length = 100)
-    private String rolSolicitante;
+    @Column(name = "unidad_solicitante", nullable = false, length = 100)
+    private String unidadSolicitante;
 
-    @Column(name = "departamento_solicitante", length = 100)
-    private String departamentoSolicitante;
+    @Column(name = "promotor", nullable = false, length = 60)
+    private String promotor;
 
-    @Column(name = "recursos_humanos", columnDefinition = "TEXT")
-    private String recursosHumanos;
+    @Column(name = "importancia", nullable = false)
+    private Integer importancia;
 
-    @Column(name = "recursos_financieros_estimados", precision = 10, scale = 2)
-    private BigDecimal recursosFinancierosEstimados;
+    @Column(name = "interesados", nullable = false, columnDefinition = "TEXT")
+    private String interesados;
 
-    @Column(name = "recursos_tiempo_estimado", length = 50)
-    private String recursosTiempoEstimado;
+    @Column(name = "financiacion", nullable = false, columnDefinition = "DECIMAL(10,2)")
+    private Double financiacion;
 
-    @Column(name = "impacto_estrategico")
-    private Integer impactoEstrategico; // Valores entre 1 y 10
+    @Column(name = "aoe1", nullable = true, columnDefinition="BOOLEAN DEFAULT false")
+    private Boolean aoe1;
 
-    @Column(name = "alineacion_estrategica")
-    private Integer alineacionEstrategica; // Valores entre 1 y 10
+    @Column(name = "aoe2", nullable = true, columnDefinition="BOOLEAN DEFAULT false")
+    private Boolean aoe2;
 
-    @Column(name = "prioridad")
-    private Integer prioridad; // Valores entre 1 y 10
+    @Column(name = "aoe3", nullable = true, columnDefinition="BOOLEAN DEFAULT false")
+    private Boolean aoe3;
 
-    @Column(name = "idoneidad_tecnica")
-    private Integer idoneidadTecnica; // Valores entre 1 y 10
+    @Column(name = "aoe4", nullable = true, columnDefinition="BOOLEAN DEFAULT false")
+    private Boolean aoe4;
 
-    @Column(name = "idoneidad_financiera")
-    private Integer idoneidadFinanciera; // Valores entre 1 y 10
+    @Column(name = "aoe5", nullable = true, columnDefinition="BOOLEAN DEFAULT false")
+    private Boolean aoe5;
 
-    @Column(name = "idoneidad_temporal")
-    private Integer idoneidadTemporal; // Valores entre 1 y 10
+    @Column(name = "aoe6", nullable = true, columnDefinition="BOOLEAN DEFAULT false")
+    private Boolean aoe6;
 
-    //@Column(name = "fecha_solicitud", nullable = false)
-    //@JsonFormat(pattern = "EEEE d 'de' MMMM 'de' yyyy")
-    //private String fechaSolicitud; // Este campo almacena la fecha de solicitud
+    @Column(name = "aoe7", nullable = true, columnDefinition="BOOLEAN DEFAULT false")
+    private Boolean aoe7;
 
-    @Column(name = "fecha_solicitud", nullable = false)
-    private LocalDate fechaSolicitud;
+    @Column(name = "alcance", nullable = false, length = 100)
+    private String alcance;
 
+    @Column(name = "fecha_objetivo", nullable = false)
+    private LocalDate fechaObjetivo;
 
+    @Column(name = "normativa", nullable = true, length = 100)
+    private String normativa;
 
-    // Getters y Setters
-    // O puedes generarlos automáticamente en tu IDE como IntelliJ
+    @Lob
+    @Column(name = "especificaciones", nullable = true, columnDefinition="MEDIUMBLOB")
+    private byte[] especificaciones;
 
+    @Lob
+    @Column(name = "presupuestos", nullable = true, columnDefinition="MEDIUMBLOB")
+    private byte[] presupuestos;
+
+    @Column(name = "fecha_creado", nullable = false)
+    private LocalDate fechaCreado;
+
+    @Column(name = "cal_oportunidad", nullable = true)
+    private Integer calOportunidad;
+
+    @Column(name = "cal_disponibilidad", nullable = true)
+    private Integer calDisponibilidad;
+
+    @Column(name = "cal_financiacion", nullable = true)
+    private Integer calFinanciacion;
+
+    @Column(name = "cal_final", nullable = true)
+    private Integer calFinal;
+
+    @Column(name = "estado", nullable = false, length = 10)
+    private String estado;
+
+    // Getters y setters para cada atributo
 
     public Long getId() {
-        return ProyectoId;
+        return Id_proyecto;
+    }
+
+    public void setId(Long proyectoId) {
+        Id_proyecto = proyectoId;
     }
 
     public String getTitulo() {
         return titulo;
     }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public String getJustificacion() {
-        return justificacion;
-    }
-
-    public String getMetasObjetivo() {
-        return metasObjetivo;
-    }
-
-    public String getImpactoEsperado() {
-        return impactoEsperado;
-    }
-
-    public String getAlcance() {
-        return alcance;
-    }
-
-    public String getRequisitosFuncionales() {
-        return requisitosFuncionales;
-    }
-
-    public String getRequisitosNoFuncionales() {
-        return requisitosNoFuncionales;
-    }
-
-    //public Set<Estado> getEstado() {
-    //    return estados;
-    //}
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public String getNombreSolicitante() {
-        return nombreSolicitante;
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
     }
 
     public String getCorreoSolicitante() {
         return correoSolicitante;
     }
 
-    public String getRolSolicitante() {
-        return rolSolicitante;
+    public void setCorreoSolicitante(String correoSolicitante) {
+        this.correoSolicitante = correoSolicitante;
     }
 
-    public String getDepartamentoSolicitante() {
-        return departamentoSolicitante;
+    public String getUnidadSolicitante() {
+        return unidadSolicitante;
     }
 
-    public String getRecursosHumanos() {
-        return recursosHumanos;
+    public void setUnidadSolicitante(String unidadSolicitante) {
+        this.unidadSolicitante = unidadSolicitante;
     }
 
-    public BigDecimal getRecursosFinancierosEstimados() {
-        return recursosFinancierosEstimados;
+    public String getNombreCorto() {
+        return nombreCorto;
     }
 
-    public String getRecursosTiempoEstimado() {
-        return recursosTiempoEstimado;
+    public void setNombreCorto(String nombreCorto) {
+        this.nombreCorto = nombreCorto;
     }
 
-    public Integer getImpactoEstrategico() {
-        return impactoEstrategico;
+    public byte[] getMemoria() {
+        return memoria;
     }
 
-    public Integer getAlineacionEstrategica() {
-        return alineacionEstrategica;
+    public void setMemoria(byte[] memoria) {
+        this.memoria = memoria;
     }
 
-    public Integer getPrioridad() {
-        return prioridad;
-    }
-
-    public Integer getIdoneidadTecnica() {
-        return idoneidadTecnica;
-    }
-
-    public Integer getIdoneidadFinanciera() {
-        return idoneidadFinanciera;
-    }
-
-    public Integer getIdoneidadTemporal() {
-        return idoneidadTemporal;
-    }
-
-    public LocalDate getFechaSolicitud() {
-        return fechaSolicitud;
-    }
-
-    public void setId(Long ProyectoId) {
-        this.ProyectoId = ProyectoId;
-    }
-
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public void setJustificacion(String justificacion) {
-        this.justificacion = justificacion;
-    }
-
-    public void setMetasObjetivo(String metasObjetivo) {
-        this.metasObjetivo = metasObjetivo;
-    }
-
-    public void setImpactoEsperado(String impactoEsperado) {
-        this.impactoEsperado = impactoEsperado;
-    }
-
-    public void setAlcance(String alcance) {
-        this.alcance = alcance;
-    }
-
-    public void setRequisitosFuncionales(String requisitosFuncionales) {
-        this.requisitosFuncionales = requisitosFuncionales;
-    }
-
-    public void setRequisitosNoFuncionales(String requisitosNoFuncionales) {
-        this.requisitosNoFuncionales = requisitosNoFuncionales;
-    }
-
-    //public void setEstado(Set<Estado> estado) {
-    //    this.estados = estado;
-    //}
-
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public String getNombreSolicitante() {
+        return nombreSolicitante;
     }
 
     public void setNombreSolicitante(String nombreSolicitante) {
         this.nombreSolicitante = nombreSolicitante;
     }
 
-    public void setCorreoSolicitante(String correoSolicitante) {
-        this.correoSolicitante = correoSolicitante;
+    public String getPromotor() {
+        return promotor;
     }
 
-    public void setRolSolicitante(String rolSolicitante) {
-        this.rolSolicitante = rolSolicitante;
+    public void setPromotor(String promotor) {
+        this.promotor = promotor;
     }
 
-    public void setDepartamentoSolicitante(String departamentoSolicitante) {
-        this.departamentoSolicitante = departamentoSolicitante;
+    public Integer getImportancia() {
+        return importancia;
     }
 
-    public void setRecursosHumanos(String recursosHumanos) {
-        this.recursosHumanos = recursosHumanos;
+    public void setImportancia(Integer importancia) {
+        this.importancia = importancia;
     }
 
-    public void setRecursosFinancierosEstimados(BigDecimal recursosFinancierosEstimados) {
-        this.recursosFinancierosEstimados = recursosFinancierosEstimados;
+    public String getInteresados() {
+        return interesados;
     }
 
-    public void setRecursosTiempoEstimado(String recursosTiempoEstimado) {
-        this.recursosTiempoEstimado = recursosTiempoEstimado;
+    public void setInteresados(String interesados) {
+        this.interesados = interesados;
     }
 
-    public void setImpactoEstrategico(Integer impactoEstrategico) {
-        this.impactoEstrategico = impactoEstrategico;
+    public Double getFinanciacion() {
+        return financiacion;
     }
 
-    public void setAlineacionEstrategica(Integer alineacionEstrategica) {
-        this.alineacionEstrategica = alineacionEstrategica;
+    public void setFinanciacion(Double financiacion) {
+        this.financiacion = financiacion;
     }
 
-    public void setPrioridad(Integer prioridad) {
-        this.prioridad = prioridad;
+    public Boolean getAoe1() {
+        return aoe1;
     }
 
-    public void setIdoneidadTecnica(Integer idoneidadTecnica) {
-        this.idoneidadTecnica = idoneidadTecnica;
+    public void setAoe1(Boolean aoe1) {
+        this.aoe1 = aoe1;
     }
 
-    public void setIdoneidadFinanciera(Integer idoneidadFinanciera) {
-        this.idoneidadFinanciera = idoneidadFinanciera;
+    public Boolean getAoe2() {
+        return aoe2;
     }
 
-    public void setIdoneidadTemporal(Integer idoneidadTemporal) {
-        this.idoneidadTemporal = idoneidadTemporal;
+    public void setAoe2(Boolean aoe2) {
+        this.aoe2 = aoe2;
     }
 
-    public void setFechaSolicitud(LocalDate fechaSolicitud) {
-        this.fechaSolicitud = fechaSolicitud;
+    public Boolean getAoe3() {
+        return aoe3;
     }
 
-    public String getComentariosAdicionales() {
-        return ComentariosAdicionales;
+    public void setAoe3(Boolean aoe3) {
+        this.aoe3 = aoe3;
     }
 
-    public void setComentariosAdicionales(String ComentariosAdicionales) {
-        this.ComentariosAdicionales = ComentariosAdicionales;
+    public Boolean getAoe4() {
+        return aoe4;
+    }
+
+    public void setAoe4(Boolean aoe4) {
+        this.aoe4 = aoe4;
+    }
+
+    public Boolean getAoe5() {
+        return aoe5;
+    }
+
+    public void setAoe5(Boolean aoe5) {
+        this.aoe5 = aoe5;
+    }
+
+    public Boolean getAoe6() {
+        return aoe6;
+    }
+
+    public void setAoe6(Boolean aoe6) {
+        this.aoe6 = aoe6;
+    }
+
+    public Boolean getAoe7() {
+        return aoe7;
+    }
+
+    public void setAoe7(Boolean aoe7) {
+        this.aoe7 = aoe7;
+    }
+
+    public String getAlcance() {
+        return alcance;
+    }
+
+    public void setAlcance(String alcance) {
+        this.alcance = alcance;
+    }
+
+    public LocalDate getFechaObjetivo() {
+        return fechaObjetivo;
+    }
+
+    public void setFechaObjetivo(LocalDate fechaObjetivo) {
+        this.fechaObjetivo = fechaObjetivo;
+    }
+
+    public String getNormativa() {
+        return normativa;
+    }
+
+    public void setNormativa(String normativa) {
+        this.normativa = normativa;
+    }
+
+    public byte[] getEspecificaciones() {
+        return especificaciones;
+    }
+
+    public void setEspecificaciones(byte[] especificaciones) {
+        this.especificaciones = especificaciones;
+    }
+
+    public byte[] getPresupuestos() {
+        return presupuestos;
+    }
+
+    public void setPresupuestos(byte[] presupuestos) {
+        this.presupuestos = presupuestos;
+    }
+
+    public LocalDate getFechaCreado() {
+        return fechaCreado;
+    }
+
+    public void setFechaCreado(LocalDate fechaCreado) {
+        this.fechaCreado = fechaCreado;
+    }
+
+    public Integer getCalOportunidad() {
+        return calOportunidad;
+    }
+
+    public void setCalOportunidad(Integer calOportunidad) {
+        this.calOportunidad = calOportunidad;
+    }
+
+    public Integer getCalDisponibilidad() {
+        return calDisponibilidad;
+    }
+
+    public void setCalDisponibilidad(Integer calDisponibilidad) {
+        this.calDisponibilidad = calDisponibilidad;
+    }
+
+    public Integer getCalFinanciacion() {
+        return calFinanciacion;
+    }
+
+    public void setCalFinanciacion(Integer calFinanciacion) {
+        this.calFinanciacion = calFinanciacion;
+    }
+
+    public Integer getCalFinal() {
+        return calFinal;
+    }
+
+    public void setCalFinal(Integer calFinal) {
+        this.calFinal = calFinal;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 }
