@@ -76,18 +76,14 @@ public class SearchUsersView extends Div implements BeforeEnterObserver {
 
         add(splitLayout);
 
-        // Configure Grid
-        //grid.addColumn("username").setHeader("Nombre de usuario").setAutoWidth(true);
         grid.addColumn(new ComponentRenderer<>(user -> {
             if (user instanceof User) { // Extra seguridad para evitar errores de inferencia.
-                Anchor anchor = new Anchor(String.format("modify-user/%s", ((User) user).getId()), user.getUsername());
+                Anchor anchor = new Anchor(String.format("modify-user/%s", ( user).getId()), user.getUsername());
                 anchor.getElement().setAttribute("theme", "tertiary");
                 return anchor;
             }
             return null; // En caso de que no sea un usuario válido.
         })).setHeader("Nombre de usuario").setAutoWidth(true);
-
-
         grid.addColumn("email").setHeader("Correo Electrónico").setAutoWidth(true);
         grid.addColumn("roles").setHeader("Rol").setAutoWidth(true);
 
