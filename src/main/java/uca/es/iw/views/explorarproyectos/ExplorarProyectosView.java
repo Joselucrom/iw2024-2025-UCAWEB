@@ -3,11 +3,13 @@ package uca.es.iw.views.explorarproyectos;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
@@ -19,6 +21,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
@@ -45,12 +48,12 @@ public class ExplorarProyectosView extends Div implements BeforeEnterObserver {
     private final Grid<Proyecto> grid = new Grid<>(Proyecto.class, false);
 
     private TextField titulo;
-    private TextArea descripcion;
-    private TextField estado;
+    private TextField solicitante;
+    private ComboBox<String> estado;
     private DatePicker fechaSolicitud;
 
-    private final Button cancel = new Button("Cancel");
-    private final Button save = new Button("Save");
+    private final Button cancel = new Button("Cancelar");
+    private final Button save = new Button("Guardar");
 
     private final BeanValidationBinder<Proyecto> binder;
 
@@ -73,25 +76,32 @@ public class ExplorarProyectosView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn("titulo").setHeader("Título").setAutoWidth(true);
-        grid.addColumn("descripcion").setHeader("Descripción").setAutoWidth(true);
+        grid.addColumn(new ComponentRenderer<>(proyecto -> {
+            if (proyecto instanceof Proyecto) {
+                Anchor anchor = new Anchor(String.format("project-view/%s", ((Proyecto)proyecto).getId()), proyecto.getNombreCorto());
+                anchor.getElement().setAttribute("theme", "tertiary");
+                return anchor;
+            }
+            return null;
+                })).setHeader("Título").setAutoWidth(true);
+        grid.addColumn("nombreSolicitante").setHeader("Solicitante").setAutoWidth(true);
         grid.addColumn("estado").setHeader("Estado").setAutoWidth(true);
-        grid.addColumn("fechaSolicitud").setHeader("Fecha de Solicitud").setAutoWidth(true);
+        grid.addColumn("fechaCreado").setHeader("Fecha de Solicitud").setAutoWidth(true);
 
         grid.setItems(query -> proyectoService.list(
                         PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
                 .stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
-        // when a row is selected or deselected, populate form
-        grid.asSingleSelect().addValueChangeListener(event -> {
+        /*grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(PROYECTO_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                //UI.getCurrent().navigate(String.format(PROYECTO_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                UI.getCurrent().navigate("/project-view/" + event.getValue().getId());
             } else {
                 clearForm();
                 UI.getCurrent().navigate(ExplorarProyectosView.class);
             }
-        });
+        });*/
 
         // Configure Form
         binder = new BeanValidationBinder<>(Proyecto.class);
@@ -100,29 +110,21 @@ public class ExplorarProyectosView extends Div implements BeforeEnterObserver {
         binder.bindInstanceFields(this);
 
         cancel.addClickListener(e -> {
-            clearForm();
-            refreshGrid();
+            titulo.clear();
+            solicitante.clear();
+            estado.clear();
+            fechaSolicitud.clear();
+
+            grid.setItems(proyectoService.searchProjects("", "", "", null));
         });
 
         save.addClickListener(e -> {
-            try {
-                if (this.proyecto == null) {
-                    this.proyecto = new Proyecto();
-                }
-                binder.writeBean(this.proyecto);
-                proyectoService.update(this.proyecto);
-                clearForm();
-                refreshGrid();
-                Notification.show("Proyecto actualizado con éxito");
-                UI.getCurrent().navigate(ExplorarProyectosView.class);
-            } catch (ObjectOptimisticLockingFailureException exception) {
-                Notification n = Notification.show(
-                        "Error al actualizar el proyecto. Otra persona ha modificado el registro.");
-                n.setPosition(Position.MIDDLE);
-                n.addThemeVariants(NotificationVariant.LUMO_ERROR);
-            } catch (ValidationException validationException) {
-                Notification.show("No se pudo actualizar el proyecto. Revisa que los valores sean válidos.");
-            }
+            String tituloText = titulo.getValue();
+            String solicitanteText = solicitante.getValue();
+            String estadoText = estado.getValue();
+            DatePicker fechaSolicitudText = fechaSolicitud;
+
+            grid.setItems(proyectoService.searchProjects(tituloText, solicitanteText, estadoText, fechaSolicitudText));
         });
     }
 
@@ -153,10 +155,11 @@ public class ExplorarProyectosView extends Div implements BeforeEnterObserver {
 
         FormLayout formLayout = new FormLayout();
         titulo = new TextField("Título");
-        descripcion = new TextArea("Descripción");
-        estado = new TextField("Estado");
+        solicitante = new TextField("Usuario solicitante");
+        estado = new ComboBox<>("Estado");
+        estado.setItems("Pendiente", "Aprobado", "Rechazado");
         fechaSolicitud = new DatePicker("Fecha de Solicitud");
-        formLayout.add(titulo, descripcion, estado, fechaSolicitud);
+        formLayout.add(titulo, solicitante, estado, fechaSolicitud);
 
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);

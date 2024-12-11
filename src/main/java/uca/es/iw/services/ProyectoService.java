@@ -5,6 +5,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.upload.Upload;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import uca.es.iw.data.Proyecto;
 import uca.es.iw.data.ProyectoRepository;
@@ -131,5 +132,32 @@ public class ProyectoService {
         select.setItems(sampleItems);
         select.setItemLabelGenerator(item -> ((SampleItem) item).label());
         select.setItemEnabledProvider(item -> !Boolean.TRUE.equals(((SampleItem) item).disabled()));
+    }
+
+    public List<Proyecto> searchProjects(String nombreCorto, String nombreSolicitante, String estado, DatePicker fechaSolicitud) {
+        Specification<Proyecto> spec = Specification.where(null);
+
+        if (nombreCorto != null && !nombreCorto.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("nombreCorto")), "%" + nombreCorto.toLowerCase() + "%"));
+        }
+
+        if (nombreSolicitante != null && !nombreSolicitante.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("nombreSolicitante")), "%" + nombreSolicitante.toLowerCase() + "%"));
+        }
+
+        if (estado != null && !estado.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("estado")), "%" + estado.toLowerCase() + "%"));
+        }
+
+        if (fechaSolicitud != null && fechaSolicitud.getValue() != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("fechaCreado"), fechaSolicitud.getValue()));
+        }
+
+        return proyectoRepository.findAll(spec);
+
     }
 }
