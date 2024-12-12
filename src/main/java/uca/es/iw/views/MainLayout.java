@@ -57,7 +57,6 @@ public class MainLayout extends AppLayout {
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
         addHeaderContent();
-        addLanguageSwitcher(); // Añadimos los botones de cambio de idioma
         addGlobalFooter(); // Añade el footer global fijo
         adjustContentForFooter(); // Ajusta el contenido para el footer
     }
@@ -73,16 +72,45 @@ public class MainLayout extends AppLayout {
         // Estilo del título
         viewTitle = new H1("Universidad de Cádiz");
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+        viewTitle.getStyle().set("color", "white"); // Cambia el color aquí
+
+        // Crear el interruptor de idioma
+        String languageText = getTranslation("menu.language");
+        String spanishText = getTranslation("menu.spanish");
+        String englishText = getTranslation("menu.english");
+
+        MenuBar languageMenu = new MenuBar();
+        languageMenu.setThemeName("tertiary-inline contrast");
+        languageMenu.getStyle()
+                .set("background-color", "#005877")
+                .set("border", "none");
+
+        // Crear el "MenuItem" principal con texto blanco
+        MenuItem languageMenuItem = languageMenu.addItem(languageText);
+        languageMenuItem.getElement().getStyle()
+                .set("color", "white")
+                .set("font-weight", "bold");
+
+        languageMenuItem.getElement().appendChild(new Icon("lumo", "dropdown").getElement());
+
+        // Submenú con elementos en negro
+        MenuItem spanishItem = languageMenuItem.getSubMenu().addItem(spanishText, e -> switchLanguage(new Locale("es")));
+        MenuItem englishItem = languageMenuItem.getSubMenu().addItem(englishText, e -> switchLanguage(new Locale("en")));
+
+        // Aplicar estilos a los elementos del submenú
+        spanishItem.getElement().getStyle().set("color", "black");
+        englishItem.getElement().getStyle().set("color", "black");
 
         // Crear un contenedor horizontal para el header
-        HorizontalLayout headerLayout = new HorizontalLayout(toggle, logo, viewTitle);
+        HorizontalLayout headerLayout = new HorizontalLayout(toggle, logo, viewTitle, languageMenu);
         headerLayout.setAlignItems(Alignment.CENTER);
         headerLayout.setWidthFull();
+        headerLayout.setSpacing(true);
         headerLayout.getStyle()
-                .set("background-color", "#003366")
-                .set("color", "white")
+                .set("background-color", "#005877")
                 .set("padding", "10px");
 
+        headerLayout.expand(viewTitle); // Hace que el título ocupe todo el espacio disponible
         addToNavbar(headerLayout);
     }
 
@@ -167,7 +195,7 @@ public class MainLayout extends AppLayout {
         // Crear el footer global
         Footer globalFooter = new Footer();
         globalFooter.getStyle()
-                .set("background-color", "#003366") // Mismo color que el header
+                .set("background-color", "#005877") // Mismo color que el header
                 .set("color", "white")
                 .set("text-align", "center")
                 .set("padding", "10px")
@@ -191,43 +219,6 @@ public class MainLayout extends AppLayout {
         getElement().getStyle().set("padding-bottom", "50px"); // Altura del footer
     }
 
-
-    private void addLanguageSwitcher() {
-        // Obtener las traducciones para los botones de idioma
-        String languageText = getTranslation("menu.language");
-        String spanishText = getTranslation("menu.spanish");
-        String englishText = getTranslation("menu.english");
-
-        // Crear el MenuBar para los idiomas
-        MenuBar languageMenu = new MenuBar();
-        languageMenu.setThemeName("tertiary-inline contrast"); // Tema más limpio
-        languageMenu.getStyle()
-                .set("background-color", "#FFFFFFFF")
-                .set("color", "white")
-                .set("border", "none"); // Sin bordes
-
-        // Crear el "MenuItem" que servirá como el botón principal del menú con el icono de flecha hacia abajo
-        MenuItem languageMenuItem = languageMenu.addItem(languageText);
-        languageMenuItem.getElement().appendChild(new Icon("lumo", "dropdown").getElement());
-
-        // Crear los ítems del submenú para cambiar el idioma
-        languageMenuItem.getSubMenu().addItem(spanishText, e -> switchLanguage(new Locale("es")));
-        languageMenuItem.getSubMenu().addItem(englishText, e -> switchLanguage(new Locale("en")));
-
-        // Añadir el MenuBar a la barra de navegación
-        HorizontalLayout languageSwitcher = new HorizontalLayout(languageMenu);
-        languageSwitcher.setPadding(true);
-        languageSwitcher.getStyle()
-                .set("margin-left", "auto") // Alinea los botones a la derecha
-                .set("background-color", "#FFFFFFFFF");
-        addToNavbar(languageSwitcher);
-
-        // Establecer el idioma predeterminado al cargar la página
-        Locale currentLocale = VaadinSession.getCurrent().getLocale();
-        if (currentLocale == null) {
-            VaadinSession.getCurrent().setLocale(Locale.ENGLISH);
-        }
-    }
 
 
 
