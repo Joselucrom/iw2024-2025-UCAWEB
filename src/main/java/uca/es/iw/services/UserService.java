@@ -1,5 +1,9 @@
 package uca.es.iw.services;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -8,6 +12,9 @@ import com.vaadin.flow.component.notification.Notification;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.FetchType;
 import jakarta.transaction.Transactional;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,6 +32,8 @@ public class UserService {
     private final UserRepository repository;
 
     private final PasswordEncoder passwordEncoder;
+
+    private static final String SPONSORS_URL = "https://e608f590-1a0b-43c5-b363-e5a883961765.mock.pstmn.io/sponsors";
 
     public UserService(UserRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
@@ -223,5 +232,82 @@ public class UserService {
         } else {
             throw new IllegalArgumentException("El usuario no existe.");
         }
+    }
+
+    public void syncSponsors() {
+        try {
+            // Obtener datos desde el servicio externo
+            JSONArray externalData = fetchSponsorsData();
+
+            // Recuperar usuarios actuales de la base de datos
+            List<User> usuarios = repository.findAll(); // Método que obtiene todos los usuarios
+
+            // Iterar sobre los usuarios y verificar si están en la lista
+            for (User usuario : usuarios) {
+                boolean isPromoter = isInSponsorList(usuario, externalData);
+
+                // Si el usuario está en la lista, actualizar su rol
+                if (isPromoter) {
+                    roleSetter(usuario, "PROMOTOR");
+                    repository.save(usuario); // Guarda los cambios en la base de datos
+                }
+                if (!isPromoter && usuario.getRoles().contains(Role.PROMOTOR) && !usuario.getRoles().contains(Role.ADMIN)) {
+                    deleteRoles(usuario.getId());
+                    roleSetter(usuario, "USER");
+                    repository.save(usuario);
+                }
+            }
+
+            System.out.println("Sincronización completada.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error durante la sincronización: " + e.getMessage());
+        }
+    }
+
+    private JSONArray fetchSponsorsData() throws Exception {
+        URL url = new URL(SPONSORS_URL);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        if (conn.getResponseCode() == 200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder response = new StringBuilder();
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+
+            in.close();
+            conn.disconnect();
+
+            // Parsear el JSON de la respuesta
+            JSONObject jsonResponse = new JSONObject(response.toString());
+            return jsonResponse.getJSONArray("data");
+        } else {
+            throw new RuntimeException("Error al obtener datos del servicio: " + conn.getResponseMessage());
+        }
+    }
+
+    private boolean isInSponsorList(User usuario, JSONArray externalData) {
+        try {
+            for (int i = 0; i < externalData.length(); i++) {
+                JSONObject sponsor = externalData.getJSONObject(i);
+
+                // Adaptar el ID externo (ejemplo: "u00000001" -> 1)
+                String externalIdString = sponsor.getString("id").substring(1); // Quitar la "u"
+                int externalId = Integer.parseInt(externalIdString);
+
+                // Verificar si coinciden el ID y el nombre
+                if (usuario.getId() == externalId &&
+                        usuario.getName().equalsIgnoreCase(sponsor.getString("nombre"))) {
+                    return true;
+                }
+            }
+        } catch (JSONException e) {
+            System.err.println("Error al procesar los datos del patrocinador: " + e.getMessage());
+        }
+        return false;
     }
 }

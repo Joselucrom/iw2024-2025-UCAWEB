@@ -55,6 +55,7 @@ public class SearchUsersView extends Div implements BeforeEnterObserver {
 
     private final Button cancel = new Button("Cancelar");
     private final Button save = new Button("Guardar");
+    private final Button update = new Button("Actualizar promotores");
 
     private final BeanValidationBinder<User> binder;
 
@@ -124,6 +125,12 @@ public class SearchUsersView extends Div implements BeforeEnterObserver {
             // Filtrar usuarios
             grid.setItems(userService.searchUsers(nombreValue, emailValue));
         });
+
+        update.addClickListener(e -> {
+            userService.syncSponsors();
+            Notification.show("Promotores actualizados", 3000, Position.BOTTOM_START);
+            UI.getCurrent().getPage().reload();
+        });
     }
 
     @Override
@@ -181,6 +188,9 @@ public class SearchUsersView extends Div implements BeforeEnterObserver {
         wrapper.setClassName("grid-wrapper");
         splitLayout.addToPrimary(wrapper);
         wrapper.add(grid);
+        update.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        wrapper.add(update);
+
     }
 
     private void refreshGrid() {
