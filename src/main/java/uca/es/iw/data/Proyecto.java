@@ -86,6 +86,9 @@ public class Proyecto {
     @Column(name = "cal_oportunidad", nullable = true)
     private Integer calOportunidad;
 
+    @Column(name = "cal_tecnica", nullable = true)
+    private Integer calTecnica;
+
     @Column(name = "cal_disponibilidad", nullable = true)
     private Integer calDisponibilidad;
 
@@ -330,5 +333,13 @@ public class Proyecto {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public Integer getCalTecnica() {
+        return calTecnica;
+    }
+
+    public void setCalTecnica(Integer calTecnica) {
+        this.calTecnica = calTecnica;
     }
 }
