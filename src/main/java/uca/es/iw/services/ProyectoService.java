@@ -1,15 +1,14 @@
 package uca.es.iw.services;
 
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.upload.Upload;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import uca.es.iw.data.Proyecto;
 import uca.es.iw.data.ProyectoRepository;
-import uca.es.iw.data.User;
 import uca.es.iw.data.UserRepository;
 
 import java.time.LocalDate;
@@ -119,10 +118,19 @@ public class ProyectoService {
         }
     }
 
+    public void updateCalTecnica(String nombreCorto, int calTecnica) {
+        Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
+                .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
+
+        proyecto.setCalTecnica(calTecnica);
+        proyectoRepository.save(proyecto);
+    }
+
+
     public record SampleItem(String value, String label, Boolean disabled) {
     }
 
-    public void setSelectData(Select select) {
+    public void setSelectSponsors(Select select) {
         List<String> promotores = userRepository.findPromotor();
 
         List<SampleItem> sampleItems = promotores.stream()
@@ -132,6 +140,16 @@ public class ProyectoService {
         select.setItems(sampleItems);
         select.setItemLabelGenerator(item -> ((SampleItem) item).label());
         select.setItemEnabledProvider(item -> !Boolean.TRUE.equals(((SampleItem) item).disabled()));
+    }
+
+    public void setSelectProjects(ComboBox<String> comboBox) {
+        List<String> proyectos = proyectoRepository.findPendingProjects();
+
+        List<SampleItem> sampleItems = proyectos.stream()
+                .map(name -> new SampleItem(null, name, null))
+                .collect(Collectors.toList());
+
+        comboBox.setItems(proyectos);
     }
 
     public List<Proyecto> searchProjects(String nombreCorto, String nombreSolicitante, String estado, DatePicker fechaSolicitud) {
@@ -159,5 +177,16 @@ public class ProyectoService {
 
         return proyectoRepository.findAll(spec);
 
+    }
+
+    public String getDownloadUrl(String nombreProyecto) {
+        return "/api/downloads?nombreProyecto=" + nombreProyecto;
+    }
+
+    public Integer getCalificacionTecnica(String nombreCorto) {
+        Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
+                .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
+
+        return proyecto.getCalTecnica();  // Devuelve la calificación técnica o null si no tiene
     }
 }

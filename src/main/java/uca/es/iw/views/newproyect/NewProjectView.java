@@ -26,20 +26,15 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
-import org.springframework.beans.factory.annotation.Autowired;
-import uca.es.iw.data.ProyectoRepository;
 import uca.es.iw.services.ProyectoService;
-import uca.es.iw.data.UserRepository;
 
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 @PageTitle("Solicitar nuevo proyecto")
 @Route("new-proyect-form")
@@ -134,7 +129,7 @@ public class NewProjectView extends Composite<VerticalLayout> {
         h22.setWidth("max-content");
         select.setLabel("Promotor: *");
         select.setWidth("300px");
-        proyectoService.setSelectData(select);
+        proyectoService.setSelectSponsors(select);
         importancia.setLabel("Importancia para el promotor (0-5): *");
         importancia.setWidth("300px");
         h23.setText("Justificación del proyecto");

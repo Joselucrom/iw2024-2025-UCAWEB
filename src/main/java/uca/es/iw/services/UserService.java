@@ -162,7 +162,7 @@ public class UserService {
     public void roleSetter (User user, String role) {
         switch (role) {
             case "ADMIN":
-                user.setRoles(Set.of(Role.ADMIN, Role.USER, Role.CIO, Role.PROMOTOR));
+                user.setRoles(Set.of(Role.ADMIN, Role.USER, Role.CIO, Role.PROMOTOR, Role.OTP));
                 break;
             case "USER":
                 user.setRoles(Set.of(Role.USER));
