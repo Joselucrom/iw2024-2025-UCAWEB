@@ -21,29 +21,39 @@ public class ProyectoController {
     }
 
     @GetMapping("/api/downloads")
-    public ResponseEntity<byte[]> descargarMemoria(@RequestParam String nombreProyecto) {
+    public ResponseEntity<byte[]> descargarMemoria(@RequestParam String nombreProyecto, int option) {
         Optional<Proyecto> proyectoOptional = proyectoRepository.findByNombreCorto(nombreProyecto);
 
         if (proyectoOptional.isPresent()) {
             Proyecto proyecto = proyectoOptional.get();
+            byte[] archivo = null;
+            String tipoArchivo = "";
 
-            if (proyecto.getMemoria() != null) {
-                byte[] memoria = proyecto.getMemoria();
+            // Seleccionar el archivo según la opción
+            if (option == 1) {
+                archivo = proyecto.getMemoria();
+                tipoArchivo = "memoria";
+            } else if (option == 2) {
+                archivo = proyecto.getEspecificaciones();
+                tipoArchivo = "especificaciones";
+            } else if (option == 3) {
+                archivo = proyecto.getPresupuestos();
+                tipoArchivo = "presupuestos";
+            }
 
+            if (archivo != null) {
                 HttpHeaders headers = new HttpHeaders();
-                headers.add("Content-Disposition", "attachment; filename=" + nombreProyecto + "_memoria.pdf");
+                headers.add("Content-Disposition", "attachment; filename=" + nombreProyecto + "_" + tipoArchivo + ".pdf");
 
                 return ResponseEntity
                         .status(HttpStatus.OK)
                         .headers(headers)
-                        .body(memoria);
+                        .body(archivo);
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(null); // Memoria no disponible
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Archivo no disponible
             }
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(null); // Proyecto no encontrado
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Proyecto no encontrado
         }
     }
 }

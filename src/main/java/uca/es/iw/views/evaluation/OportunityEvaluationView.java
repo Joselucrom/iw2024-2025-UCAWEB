@@ -101,7 +101,7 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
         downloadButton.addClickListener(e -> {
             String selectedProject = comboBox.getValue(); // Obtiene el proyecto seleccionado actual
             if (selectedProject != null) {
-                String downloadUrl = proyectoService.getDownloadUrl(selectedProject);
+                String downloadUrl = proyectoService.getDownloadUrl(selectedProject, 1);
                 getUI().ifPresent(ui -> ui.getPage().open(downloadUrl));
             }
         });

@@ -1,6 +1,8 @@
 package uca.es.iw.views.evaluation;
 
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -28,6 +30,12 @@ import java.util.List;
 @Menu(order = 7, icon = "line-awesome/svg/clipboard-list-solid.svg")
 @RolesAllowed("OTP")
 public class TechnicalEvaluationView extends Composite<VerticalLayout> {
+
+    @ClientCallable
+    public void showNotification(String message) {
+        Notification.show(message, 3000, Notification.Position.MIDDLE);
+    }
+
     ProyectoService proyectoService;
 
     public TechnicalEvaluationView(ProyectoService proyectoService) {
@@ -81,7 +89,9 @@ public class TechnicalEvaluationView extends Composite<VerticalLayout> {
         // Evento de selección de ComboBox
         comboBox.addValueChangeListener(event -> {
             String selectedProject = event.getValue();
-            downloadButton.setEnabled(selectedProject != null); // Activa o desactiva el botón
+
+            downloadButton.setEnabled(selectedProject != null);
+            downloadButton2.setEnabled(selectedProject != null);
 
             if (selectedProject != null) {
                 // Mostrar el Span
@@ -103,10 +113,36 @@ public class TechnicalEvaluationView extends Composite<VerticalLayout> {
         downloadButton.addClickListener(e -> {
             String selectedProject = comboBox.getValue(); // Obtiene el proyecto seleccionado actual
             if (selectedProject != null) {
-                String downloadUrl = proyectoService.getDownloadUrl(selectedProject);
-                getUI().ifPresent(ui -> ui.getPage().open(downloadUrl));
+                String downloadUrl = proyectoService.getDownloadUrl(selectedProject, 1);
+                // Validar si el archivo existe antes de abrir la pestaña
+                UI.getCurrent().getPage().executeJs(
+                        "fetch($0, { method: 'HEAD' }).then(response => { " +
+                                "if (response.ok) {" +
+                                "    window.open($0, '_blank');" +
+                                "} else {" +
+                                "    $1.$server.showNotification('La memoria no está disponible para el proyecto seleccionado.');" +
+                                "}});",
+                        downloadUrl, getElement());
             }
         });
+
+        downloadButton2.addClickListener(e -> {
+            String selectedProject = comboBox.getValue(); // Obtiene el proyecto seleccionado actual
+            if (selectedProject != null) {
+                String downloadUrl = proyectoService.getDownloadUrl(selectedProject, 2);
+                // Validar si el archivo existe antes de abrir la pestaña
+                UI.getCurrent().getPage().executeJs(
+                        "fetch($0, { method: 'HEAD' }).then(response => { " +
+                                "if (response.ok) {" +
+                                "    window.open($0, '_blank');" +
+                                "} else {" +
+                                "    $1.$server.showNotification('Las especificaciones no están disponibles para el proyecto seleccionado.');" +
+                                "}});",
+                        downloadUrl, getElement());
+            }
+        });
+
+
 
         h2.setText("Calidad del producto");
         layoutColumn2.setAlignSelf(Alignment.CENTER, h2);
@@ -213,6 +249,7 @@ public class TechnicalEvaluationView extends Composite<VerticalLayout> {
         layoutColumn2.add(formLayout2Col);
         formLayout2Col.add(comboBox);
         layoutColumn2.add(downloadButton); // Añadir botón de descarga debajo del ComboBox
+        layoutColumn2.add(downloadButton2); // Añadir botón de descarga debajo del ComboBox
         layoutColumn2.add(calificacionTecnicaLabel); // Añadir label de calificación técnica
         layoutColumn2.add(hr);
         layoutColumn2.add(h2);

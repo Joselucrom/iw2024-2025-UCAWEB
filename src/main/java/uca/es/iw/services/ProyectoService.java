@@ -187,8 +187,8 @@ public class ProyectoService {
 
     }
 
-    public String getDownloadUrl(String nombreProyecto) {
-        return "/api/downloads?nombreProyecto=" + nombreProyecto;
+    public String getDownloadUrl(String nombreProyecto, int option) {
+        return "/api/downloads?nombreProyecto=" + nombreProyecto + "&option=" + option;
     }
 
     public Integer getCalificacionTecnica(String nombreCorto) {
