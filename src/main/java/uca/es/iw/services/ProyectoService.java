@@ -126,6 +126,14 @@ public class ProyectoService {
         proyectoRepository.save(proyecto);
     }
 
+    public void updateCalOportunidad(String nombreCorto, int calOportunidad) {
+        Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
+                .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
+
+        proyecto.setCalOportunidad(calOportunidad);
+        proyectoRepository.save(proyecto);
+    }
+
 
     public record SampleItem(String value, String label, Boolean disabled) {
     }
@@ -188,5 +196,12 @@ public class ProyectoService {
                 .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
 
         return proyecto.getCalTecnica();  // Devuelve la calificación técnica o null si no tiene
+    }
+
+    public Integer getCalificacionOportunidad(String nombreCorto) {
+        Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
+                .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
+
+        return proyecto.getCalOportunidad();  // Devuelve la calificación técnica o null si no tiene
     }
 }
