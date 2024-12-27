@@ -220,7 +220,7 @@ public class TechnicalEvaluationView extends Composite<VerticalLayout> {
 
             // Calcular la suma total de las calificaciones
             Double calTecnica = (calAdecuacion + calMantenibilidad + calPortabilidad + calEficiencia + calUsabilidad +
-                    calCompatibilidad + calSeguridad + gesGarantia + gesTiempoRespuesta + gesAtencionCliente + gesDocumentacion)*1.0;
+                    calCompatibilidad + calSeguridad + gesGarantia + gesTiempoRespuesta + gesAtencionCliente + gesDocumentacion)/11.0;
 
             try {
                 proyectoService.updateCalTecnica(selectedProject, calTecnica);

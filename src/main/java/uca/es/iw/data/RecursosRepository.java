@@ -7,29 +7,29 @@ import org.springframework.data.jpa.repository.Query;
 public interface RecursosRepository extends JpaRepository<Recursos, Long>, JpaSpecificationExecutor<Recursos> {
 
     @Query(value = """
-            SELECT presupuestoTotal
-    FROM Recursos
+            SELECT presupuesto_total
+    FROM recursos
     WHERE id = 1;
     """, nativeQuery = true)
     Double findPresupuestoTotal();
 
     @Query(value = """
-            SELECT recursosHumanosTotal
-    FROM Recursos
+            SELECT recursos_humanos_total
+    FROM recursos
     WHERE id = 1;
     """, nativeQuery = true)
     Integer findRecursosHumanosTotal();
 
     @Query(value = """
-            SELECT presupuestoRestante
-    FROM Recursos
+            SELECT presupuesto_restante
+    FROM recursos
     WHERE id = 1;
     """, nativeQuery = true)
     Double findPresupuestoRestante();
 
     @Query(value = """
-            SELECT recursosHumanosRestantes
-    FROM Recursos
+            SELECT recursos_humanos_restantes
+    FROM recursos
     WHERE id = 1;
     """, nativeQuery = true)
     Integer findRecursosHumanosRestantes();

@@ -96,7 +96,7 @@ public class Proyecto {
     private Double calFinanciacion;
 
     @Column(name = "cal_final", nullable = true, columnDefinition = "DECIMAL(10,2)")
-    private Integer calFinal;
+    private Double calFinal;
 
     @Column(name = "estado", nullable = false, length = 10)
     private String estado;
@@ -319,11 +319,11 @@ public class Proyecto {
         this.calFinanciacion = calFinanciacion;
     }
 
-    public Integer getCalFinal() {
+    public Double getCalFinal() {
         return calFinal;
     }
 
-    public void setCalFinal(Integer calFinal) {
+    public void setCalFinal(Double calFinal) {
         this.calFinal = calFinal;
     }
 

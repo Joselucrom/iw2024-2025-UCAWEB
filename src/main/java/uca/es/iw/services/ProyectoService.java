@@ -7,9 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import uca.es.iw.data.Proyecto;
-import uca.es.iw.data.ProyectoRepository;
-import uca.es.iw.data.UserRepository;
+import uca.es.iw.data.*;
+
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,9 +22,12 @@ public class ProyectoService {
 
     private final UserRepository userRepository;
 
-    public ProyectoService(ProyectoRepository proyectoRepository, UserRepository userRepository) {
+    private final PonderacionesRepository ponderacionesRepository;
+
+    public ProyectoService(ProyectoRepository proyectoRepository, UserRepository userRepository, PonderacionesRepository ponderacionesRepository) {
         this.proyectoRepository = proyectoRepository;
         this.userRepository = userRepository;
+        this.ponderacionesRepository = ponderacionesRepository;
     }
 
     public Proyecto guardarProyecto(String titulo, String nombrecorto, byte[] memoria, String nombresolicitante, String correo, String unidad, String select, int importancia, String interesados, Double financiacion, String alcance, LocalDate fechaObjetivo, String normativa, List<String> selectedValues, byte[] especificaciones, byte[] presupuesto) {
@@ -122,6 +124,15 @@ public class ProyectoService {
         Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
                 .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
 
+        if (proyecto.getCalDisponibilidad() != null && proyecto.getCalOportunidad() != null) {
+            Ponderaciones ponderaciones = ponderacionesRepository.findById(1)
+                    .orElseThrow(() -> new IllegalArgumentException("No se han encontrado las ponderaciones"));
+            double calFinal = calTecnica * ponderaciones.getPonTecnica() +
+                    proyecto.getCalOportunidad() * ponderaciones.getPonOportunidad() +
+                    proyecto.getCalDisponibilidad() * ponderaciones.getPonDisponibilidad();
+            proyecto.setCalFinal(calFinal);
+        }
+
         proyecto.setCalTecnica(calTecnica);
         proyectoRepository.save(proyecto);
     }
@@ -129,6 +140,15 @@ public class ProyectoService {
     public void updateCalOportunidad(String nombreCorto, Double calOportunidad) {
         Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
                 .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
+
+        if (proyecto.getCalDisponibilidad() != null && proyecto.getCalTecnica() != null) {
+            Ponderaciones ponderaciones = ponderacionesRepository.findById(1)
+                    .orElseThrow(() -> new IllegalArgumentException("No se han encontrado las ponderaciones"));
+            double calFinal = proyecto.getCalTecnica() * ponderaciones.getPonTecnica() +
+                    calOportunidad * ponderaciones.getPonOportunidad() +
+                    proyecto.getCalDisponibilidad() * ponderaciones.getPonDisponibilidad();
+            proyecto.setCalFinal(calFinal);
+        }
 
         proyecto.setCalOportunidad(calOportunidad);
         proyectoRepository.save(proyecto);
@@ -205,11 +225,11 @@ public class ProyectoService {
         return proyecto.getCalOportunidad();  // Devuelve la calificación técnica o null si no tiene
     }
 
-    public Double getCalificacionFinanciacion(String nombreCorto) {
+    public Double getCalificacionDisponibilidad(String nombreCorto) {
         Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
                 .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
 
-        return proyecto.getCalFinanciacion();  // Devuelve la calificación de financiación o null si no tiene
+        return proyecto.getCalDisponibilidad();  // Devuelve la calificación de financiación o null si no tiene
     }
 
     public Double getFinanciacionAportada(String nombreCorto) {
@@ -222,6 +242,15 @@ public class ProyectoService {
     public void updateCalDisponibilidad(String nombreCorto, Double calDisponibilidad) {
         Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
                 .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
+
+        if (proyecto.getCalTecnica() != null && proyecto.getCalOportunidad() != null) {
+            Ponderaciones ponderaciones = ponderacionesRepository.findById(1)
+                    .orElseThrow(() -> new IllegalArgumentException("No se han encontrado las ponderaciones"));
+            double calFinal = proyecto.getCalTecnica() * ponderaciones.getPonTecnica() +
+                    proyecto.getCalOportunidad() * ponderaciones.getPonOportunidad() +
+                    calDisponibilidad * ponderaciones.getPonDisponibilidad();
+            proyecto.setCalFinal(calFinal);
+        }
 
         proyecto.setCalDisponibilidad(calDisponibilidad);
         proyectoRepository.save(proyecto);

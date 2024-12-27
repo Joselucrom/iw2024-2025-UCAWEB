@@ -56,9 +56,12 @@ insert into user_roles (user_id, roles) values ('22', 'CIO');
 insert into user_roles (user_id, roles) values ('22', 'PROMOTOR');
 insert into user_roles (user_id, roles) values ('22', 'OTP');
 insert into recursos (id, presupuesto_restante, presupuesto_total, recursos_humanos_total, recursos_humanos_restantes) values (1, 5000000, 5000000, 50, 50);
+insert into ponderaciones (id, pon_disponibilidad, pon_oportunidad, pon_tecnica) values (1, 0.4, 0.3, 0.3);
 
 
 
 
 DROP TABLE user_roles;
 DROP TABLE application_user;
+DROP TABLE recursos;
+DROP TABLE ponderaciones;

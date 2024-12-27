@@ -337,9 +337,9 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
             }
 
             // Calcular la calificación de oportunidad
-            int calOportunidad_ = (importancia + urgencia + impacto + ahorro + riesgos + dimension + memoria + hitos + objetivosSeleccionados.size() * 2);
+            int calOportunidad_ = (importancia + urgencia + impacto + ahorro + riesgos + dimension + memoria + hitos + (objetivosSeleccionados.size() * 2));
 
-            Double calOportunidad = calOportunidad_/2.0;
+            Double calOportunidad = calOportunidad_ / 5.1;
 
             try {
                 proyectoService.updateCalOportunidad(selectedProject, calOportunidad);
@@ -347,9 +347,12 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
 
                 // Limpiar los campos después de la acción
                 comboBox.clear();
+                impactoPersonas.clear();
+                ahorroMejoras.clear();
                 necesidadImportancia.clear();
                 necesidadUrgencia.clear();
                 riesgosComplejidad.clear();
+                dimensionSostenibilidad.clear();
                 memoriaCompleta.clear();
                 hitosClaros.clear();
                 checkboxGroup.clear();
