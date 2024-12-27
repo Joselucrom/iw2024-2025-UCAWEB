@@ -83,19 +83,19 @@ public class Proyecto {
     @Column(name = "fecha_creado", nullable = false)
     private LocalDate fechaCreado;
 
-    @Column(name = "cal_oportunidad", nullable = true)
-    private Integer calOportunidad;
+    @Column(name = "cal_oportunidad", nullable = true, columnDefinition = "DECIMAL(10,2)")
+    private Double calOportunidad;
 
-    @Column(name = "cal_tecnica", nullable = true)
-    private Integer calTecnica;
+    @Column(name = "cal_tecnica", nullable = true, columnDefinition = "DECIMAL(10,2)")
+    private Double calTecnica;
 
-    @Column(name = "cal_disponibilidad", nullable = true)
-    private Integer calDisponibilidad;
+    @Column(name = "cal_disponibilidad", nullable = true, columnDefinition = "DECIMAL(10,2)")
+    private Double calDisponibilidad;
 
-    @Column(name = "cal_financiacion", nullable = true)
-    private Integer calFinanciacion;
+    @Column(name = "cal_financiacion", nullable = true, columnDefinition = "DECIMAL(10,2)")
+    private Double calFinanciacion;
 
-    @Column(name = "cal_final", nullable = true)
+    @Column(name = "cal_final", nullable = true, columnDefinition = "DECIMAL(10,2)")
     private Integer calFinal;
 
     @Column(name = "estado", nullable = false, length = 10)
@@ -295,27 +295,27 @@ public class Proyecto {
         this.fechaCreado = fechaCreado;
     }
 
-    public Integer getCalOportunidad() {
+    public Double getCalOportunidad() {
         return calOportunidad;
     }
 
-    public void setCalOportunidad(Integer calOportunidad) {
+    public void setCalOportunidad(Double calOportunidad) {
         this.calOportunidad = calOportunidad;
     }
 
-    public Integer getCalDisponibilidad() {
+    public Double getCalDisponibilidad() {
         return calDisponibilidad;
     }
 
-    public void setCalDisponibilidad(Integer calDisponibilidad) {
+    public void setCalDisponibilidad(Double calDisponibilidad) {
         this.calDisponibilidad = calDisponibilidad;
     }
 
-    public Integer getCalFinanciacion() {
+    public Double getCalFinanciacion() {
         return calFinanciacion;
     }
 
-    public void setCalFinanciacion(Integer calFinanciacion) {
+    public void setCalFinanciacion(Double calFinanciacion) {
         this.calFinanciacion = calFinanciacion;
     }
 
@@ -335,11 +335,11 @@ public class Proyecto {
         this.estado = estado;
     }
 
-    public Integer getCalTecnica() {
+    public Double getCalTecnica() {
         return calTecnica;
     }
 
-    public void setCalTecnica(Integer calTecnica) {
+    public void setCalTecnica(Double calTecnica) {
         this.calTecnica = calTecnica;
     }
 }
