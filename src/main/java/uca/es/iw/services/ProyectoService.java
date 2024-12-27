@@ -118,7 +118,7 @@ public class ProyectoService {
         }
     }
 
-    public void updateCalTecnica(String nombreCorto, int calTecnica) {
+    public void updateCalTecnica(String nombreCorto, Double calTecnica) {
         Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
                 .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
 
@@ -126,7 +126,7 @@ public class ProyectoService {
         proyectoRepository.save(proyecto);
     }
 
-    public void updateCalOportunidad(String nombreCorto, int calOportunidad) {
+    public void updateCalOportunidad(String nombreCorto, Double calOportunidad) {
         Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
                 .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
 
@@ -191,17 +191,39 @@ public class ProyectoService {
         return "/api/downloads?nombreProyecto=" + nombreProyecto + "&option=" + option;
     }
 
-    public Integer getCalificacionTecnica(String nombreCorto) {
+    public Double getCalificacionTecnica(String nombreCorto) {
         Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
                 .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
 
         return proyecto.getCalTecnica();  // Devuelve la calificación técnica o null si no tiene
     }
 
-    public Integer getCalificacionOportunidad(String nombreCorto) {
+    public Double getCalificacionOportunidad(String nombreCorto) {
         Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
                 .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
 
         return proyecto.getCalOportunidad();  // Devuelve la calificación técnica o null si no tiene
+    }
+
+    public Double getCalificacionFinanciacion(String nombreCorto) {
+        Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
+                .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
+
+        return proyecto.getCalFinanciacion();  // Devuelve la calificación de financiación o null si no tiene
+    }
+
+    public Double getFinanciacionAportada(String nombreCorto) {
+        Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
+                .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
+
+        return proyecto.getFinanciacion();  // Devuelve la financiación aportada o null si no tiene
+    }
+
+    public void updateCalDisponibilidad(String nombreCorto, Double calDisponibilidad) {
+        Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
+                .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
+
+        proyecto.setCalDisponibilidad(calDisponibilidad);
+        proyectoRepository.save(proyecto);
     }
 }

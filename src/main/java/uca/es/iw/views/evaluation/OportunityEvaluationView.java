@@ -1,6 +1,8 @@
 package uca.es.iw.views.evaluation;
 
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
@@ -30,6 +32,12 @@ import java.util.Set;
 @Menu(order = 8, icon = "line-awesome/svg/clipboard-list-solid.svg")
 @RolesAllowed("CIO")
 public class OportunityEvaluationView extends Composite<VerticalLayout> {
+
+    @ClientCallable
+    public void showNotification(String message) {
+        Notification.show(message, 3000, Notification.Position.MIDDLE);
+    }
+
     ProyectoService proyectoService;
 
     public OportunityEvaluationView(ProyectoService proyectoService) {
@@ -41,11 +49,18 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
         Hr hr = new Hr();
         H2 h2 = new H2();
         Hr hr2 = new Hr();
-        ComboBox<Integer> comboBox2 = new ComboBox<>();
         Hr hr3 = new Hr();
         H2 h22 = new H2();
         Hr hr4 = new Hr();
-        ComboBox<Integer> comboBox3 = new ComboBox<>();
+        Hr hr5 = new Hr();
+        H2 h23 = new H2();
+        Hr hr6 = new Hr();
+        Hr hr7 = new Hr();
+        H2 h24 = new H2();
+        Hr hr8 = new Hr();
+        Hr hr9 = new Hr();
+        H2 h25 = new H2();
+        Hr hr10 = new Hr();
         HorizontalLayout layoutRow = new HorizontalLayout();
         Button buttonPrimary = new Button();
 
@@ -53,6 +68,10 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
         Button downloadButton = new Button("Descargar memoria");
         downloadButton.setEnabled(false); // Inicialmente deshabilitado
         downloadButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+
+        Button downloadButton2 = new Button("Descargar documento de especificaciones técnicas");
+        downloadButton2.setEnabled(false); // Inicialmente deshabilitado
+        downloadButton2.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         // Añadir Span para mostrar la calificación de oportunidad
         Span calificacionOportunidadLabel = new Span("Calificación de oportunidad: Sin calificar");
@@ -80,13 +99,14 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
         comboBox.addValueChangeListener(event -> {
             String selectedProject = event.getValue();
             downloadButton.setEnabled(selectedProject != null); // Activa o desactiva el botón
+            downloadButton2.setEnabled(selectedProject != null); // Activa o desactiva el botón
 
             if (selectedProject != null) {
                 // Mostrar el Span
                 calificacionOportunidadLabel.setVisible(true);
 
                 // Obtener la calificación de oportunidad desde el servicio (si existe)
-                Integer calOportunidad = proyectoService.getCalificacionOportunidad(selectedProject);
+                Double calOportunidad = proyectoService.getCalificacionOportunidad(selectedProject);
                 if (calOportunidad != null) {
                     calificacionOportunidadLabel.setText("Calificación de oportunidad: " + calOportunidad);
                 } else {
@@ -102,7 +122,31 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
             String selectedProject = comboBox.getValue(); // Obtiene el proyecto seleccionado actual
             if (selectedProject != null) {
                 String downloadUrl = proyectoService.getDownloadUrl(selectedProject, 1);
-                getUI().ifPresent(ui -> ui.getPage().open(downloadUrl));
+                // Validar si el archivo existe antes de abrir la pestaña
+                UI.getCurrent().getPage().executeJs(
+                        "fetch($0, { method: 'HEAD' }).then(response => { " +
+                                "if (response.ok) {" +
+                                "    window.open($0, '_blank');" +
+                                "} else {" +
+                                "    $1.$server.showNotification('La memoria no está disponible para el proyecto seleccionado.');" +
+                                "}});",
+                        downloadUrl, getElement());
+            }
+        });
+
+        downloadButton2.addClickListener(e -> {
+            String selectedProject = comboBox.getValue(); // Obtiene el proyecto seleccionado actual
+            if (selectedProject != null) {
+                String downloadUrl = proyectoService.getDownloadUrl(selectedProject, 2);
+                // Validar si el archivo existe antes de abrir la pestaña
+                UI.getCurrent().getPage().executeJs(
+                        "fetch($0, { method: 'HEAD' }).then(response => { " +
+                                "if (response.ok) {" +
+                                "    window.open($0, '_blank');" +
+                                "} else {" +
+                                "    $1.$server.showNotification('Las especificaciones no están disponibles para el proyecto seleccionado.');" +
+                                "}});",
+                        downloadUrl, getElement());
             }
         });
 
@@ -113,12 +157,26 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
         // Añadir campos de evaluación para "Necesidad y urgencia"
         ComboBox<Integer> necesidadImportancia = new ComboBox<>("Importancia de la necesidad");
         necesidadImportancia.setItems(getNumericOptions());
+        necesidadImportancia.setWidth("400px");
         ComboBox<Integer> necesidadUrgencia = new ComboBox<>("Urgencia de la necesidad");
         necesidadUrgencia.setItems(getNumericOptions());
+        necesidadUrgencia.setWidth("400px");
 
         h22.setText("Alineación con los objetivos estratégicos");
         layoutColumn2.setAlignSelf(FlexComponent.Alignment.CENTER, h22);
         h22.setWidth("max-content");
+
+        h23.setText("Impacto y beneficios");
+        layoutColumn2.setAlignSelf(FlexComponent.Alignment.CENTER, h23);
+        h23.setWidth("max-content");
+
+        h24.setText("Riesgos y complejidad");
+        layoutColumn2.setAlignSelf(FlexComponent.Alignment.CENTER, h24);
+        h24.setWidth("max-content");
+
+        h25.setText("Memoria e hitos");
+        layoutColumn2.setAlignSelf(FlexComponent.Alignment.CENTER, h25);
+        h25.setWidth("max-content");
 
         // Añadir checkbox group para "Alineación con los objetivos estratégicos"
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
@@ -137,18 +195,64 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
 
         // Más campos de evaluación...
         // Impacto y beneficios
-        ComboBox<Integer> impactoBeneficios = new ComboBox<>("Impacto y beneficios");
-        impactoBeneficios.setItems(getNumericOptions());
+        ComboBox<String> impactoPersonas = new ComboBox<>("Nº de personas afectadas");
+        impactoPersonas.setItems(
+                "1 a 50",
+                "50 a 500",
+                "500 a 2000",
+                "2000 a 10000",
+                "10000 o más"
+        );
+        impactoPersonas.setWidth("400px");
+        ComboBox<String> ahorroMejoras = new ComboBox<>("Ahorros y/o mejora de calidad de la gestión");
+        ahorroMejoras.setItems(
+                "Sin impacto notable",
+                "Impacto leve",
+                "Impacto moderado",
+                "Impacto alto",
+                "Impacto excepcional"
+        );
+        ahorroMejoras.setWidth("400px");
 
         // Riesgos y complejidad
-        ComboBox<Integer> riesgosComplejidad = new ComboBox<>("Riesgos y complejidad");
-        riesgosComplejidad.setItems(getNumericOptions());
+        ComboBox<String> riesgosComplejidad = new ComboBox<>("Riesgos y complejidad");
+        riesgosComplejidad.setItems(
+                "Sin dificultades",
+                "Dificultades leves",
+                "Dificultades moderadas",
+                "Dificultades altas",
+                "Dificultades críticas"
+        );
+        riesgosComplejidad.setWidth("400px");
+        ComboBox<String> dimensionSostenibilidad = new ComboBox<>("Dimensión y sostenibilidad");
+        dimensionSostenibilidad.setItems(
+                "Muy bajo",
+                "Bajo",
+                "Moderado",
+                "Alto",
+                "Muy alto"
+        );
+        dimensionSostenibilidad.setWidth("400px");
 
         // Memoria e hitos
-        ComboBox<Integer> memoriaCompleta = new ComboBox<>("Calidad de la memoria");
-        memoriaCompleta.setItems(getNumericOptions());
-        ComboBox<Integer> hitosClaros = new ComboBox<>("Definición de hitos claros");
-        hitosClaros.setItems(getNumericOptions());
+        ComboBox<String> memoriaCompleta = new ComboBox<>("La memoria es completa");
+        memoriaCompleta.setItems(
+                "Incompleta",
+                "Pácticamente incompleta",
+                "Aceptable",
+                "Mayormente completa",
+                "Completa"
+        );
+        memoriaCompleta.setWidth("400px");
+        ComboBox<String> hitosClaros = new ComboBox<>("Hitos claros y medibles con metas realistas *");
+        hitosClaros.setItems(
+                "Nada claros",
+                "Incompletos",
+                "Moderadamente claros",
+                "Bien detallados",
+                "Perfectamente detallados"
+        );
+        hitosClaros.setWidth("400px");
 
         layoutRow.setWidthFull();
         layoutColumn2.setFlexGrow(1.0, layoutRow);
@@ -165,10 +269,60 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
             // Obtener los valores de todas las subcategorías
             Integer importancia = necesidadImportancia.getValue();
             Integer urgencia = necesidadUrgencia.getValue();
-            Integer impacto = impactoBeneficios.getValue();
-            Integer riesgos = riesgosComplejidad.getValue();
-            Integer memoria = memoriaCompleta.getValue();
-            Integer hitos = hitosClaros.getValue();
+            String impacto_ = impactoPersonas.getValue();
+            Integer impacto = switch (impacto_) {
+                case "1 a 50" -> 1;
+                case "50 a 500" -> 2;
+                case "500 a 2000" -> 3;
+                case "2000 a 10000" -> 4;
+                case "10000 o más" -> 5;
+                default -> null;
+            };
+            String ahorro_ = ahorroMejoras.getValue();
+            Integer ahorro = switch (ahorro_) {
+                case "Sin impacto notable" -> 0;
+                case "Impacto leve" -> 1;
+                case "Impacto moderado" -> 2;
+                case "Impacto alto" -> 3;
+                case "Impacto excepcional" -> 4;
+                default -> null;
+            };
+            String riesgos_ = riesgosComplejidad.getValue();
+            Integer riesgos = switch (riesgos_) {
+                case "Sin dificultades" -> 4;
+                case "Dificultades leves" -> 3;
+                case "Dificultades moderadas" -> 2;
+                case "Dificultades altas" -> 1;
+                case "Dificultades críticas" -> 0;
+                default -> null;
+            };
+            String dimension_ = dimensionSostenibilidad.getValue();
+            Integer dimension = switch (dimension_) {
+                case "Muy bajo" -> 1;
+                case "Bajo" -> 2;
+                case "Moderado" -> 3;
+                case "Alto" -> 4;
+                case "Muy alto" -> 5;
+                default -> null;
+            };
+            String memoria_ = memoriaCompleta.getValue();
+            Integer memoria = switch (memoria_) {
+                case "Incompleta" -> 0;
+                case "Pácticamente incompleta" -> 1;
+                case "Aceptable" -> 2;
+                case "Mayormente completa" -> 3;
+                case "Completa" -> 4;
+                default -> null;
+            };
+            String hitos_ = hitosClaros.getValue();
+            Integer hitos = switch (hitos_) {
+                case "Nada claros" -> 1;
+                case "Incompletos" -> 2;
+                case "Moderadamente claros" -> 3;
+                case "Bien detallados" -> 4;
+                case "Perfectamente detallados" -> 5;
+                default -> 0;
+            };
             Set<String> objetivosSeleccionados = checkboxGroup.getSelectedItems();
 
             // Validar que se hayan seleccionado todos los campos
@@ -177,13 +331,15 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
                 return;
             }
 
-            if (importancia == null || urgencia == null || impacto == null || riesgos == null || memoria == null || hitos == null) {
+            if (importancia == null || urgencia == null || impacto == null || ahorro == null || riesgos == null || dimension == null || memoria == null) {
                 Notification.show("Por favor, completa todas las calificaciones.", 3000, Notification.Position.MIDDLE);
                 return;
             }
 
             // Calcular la calificación de oportunidad
-            int calOportunidad = importancia + urgencia + impacto + riesgos + memoria + hitos + objetivosSeleccionados.size();
+            int calOportunidad_ = (importancia + urgencia + impacto + ahorro + riesgos + dimension + memoria + hitos + objetivosSeleccionados.size() * 2);
+
+            Double calOportunidad = calOportunidad_/2.0;
 
             try {
                 proyectoService.updateCalOportunidad(selectedProject, calOportunidad);
@@ -193,12 +349,11 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
                 comboBox.clear();
                 necesidadImportancia.clear();
                 necesidadUrgencia.clear();
-                impactoBeneficios.clear();
                 riesgosComplejidad.clear();
                 memoriaCompleta.clear();
                 hitosClaros.clear();
                 checkboxGroup.clear();
-                calificacionOportunidadLabel.setVisible(false); // Ocultar el Span después de guardar
+                calificacionOportunidadLabel.setVisible(false);
             } catch (Exception ex) {
                 Notification.show("Error al actualizar la calificación: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
             }
@@ -208,6 +363,7 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
         layoutColumn2.add(formLayout2Col);
         formLayout2Col.add(comboBox);
         layoutColumn2.add(downloadButton);
+        layoutColumn2.add(downloadButton2);
         layoutColumn2.add(calificacionOportunidadLabel);
         layoutColumn2.add(hr);
         layoutColumn2.add(h2);
@@ -218,8 +374,19 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
         layoutColumn2.add(h22);
         layoutColumn2.add(hr4);
         layoutColumn2.add(checkboxGroup);
-        layoutColumn2.add(impactoBeneficios);
+        layoutColumn2.add(hr5);
+        layoutColumn2.add(h23);
+        layoutColumn2.add(hr6);
+        layoutColumn2.add(impactoPersonas);
+        layoutColumn2.add(ahorroMejoras);
+        layoutColumn2.add(hr7);
+        layoutColumn2.add(h24);
+        layoutColumn2.add(hr8);
         layoutColumn2.add(riesgosComplejidad);
+        layoutColumn2.add(dimensionSostenibilidad);
+        layoutColumn2.add(hr9);
+        layoutColumn2.add(h25);
+        layoutColumn2.add(hr10);
         layoutColumn2.add(memoriaCompleta);
         layoutColumn2.add(hitosClaros);
         layoutColumn2.add(layoutRow);
@@ -227,8 +394,8 @@ public class OportunityEvaluationView extends Composite<VerticalLayout> {
     }
 
     private List<Integer> getNumericOptions() {
-        int start = 0;
-        int end = 10;
+        int start = 1;
+        int end = 5;
         List<Integer> options = new ArrayList<>();
         for (int i = start; i <= end; i++) {
             options.add(i);

@@ -98,7 +98,7 @@ public class TechnicalEvaluationView extends Composite<VerticalLayout> {
                 calificacionTecnicaLabel.setVisible(true);
 
                 // Obtener la calificación técnica desde el servicio (si existe)
-                Integer calTecnica = proyectoService.getCalificacionTecnica(selectedProject);
+                Double calTecnica = proyectoService.getCalificacionTecnica(selectedProject);
                 if (calTecnica != null) {
                     calificacionTecnicaLabel.setText("Calificación técnica: " + calTecnica);
                 } else {
@@ -219,8 +219,8 @@ public class TechnicalEvaluationView extends Composite<VerticalLayout> {
             }
 
             // Calcular la suma total de las calificaciones
-            int calTecnica = calAdecuacion + calMantenibilidad + calPortabilidad + calEficiencia + calUsabilidad +
-                    calCompatibilidad + calSeguridad + gesGarantia + gesTiempoRespuesta + gesAtencionCliente + gesDocumentacion;
+            Double calTecnica = (calAdecuacion + calMantenibilidad + calPortabilidad + calEficiencia + calUsabilidad +
+                    calCompatibilidad + calSeguridad + gesGarantia + gesTiempoRespuesta + gesAtencionCliente + gesDocumentacion)*1.0;
 
             try {
                 proyectoService.updateCalTecnica(selectedProject, calTecnica);
