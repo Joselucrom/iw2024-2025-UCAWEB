@@ -255,4 +255,19 @@ public class ProyectoService {
         proyecto.setCalDisponibilidad(calDisponibilidad);
         proyectoRepository.save(proyecto);
     }
+
+    public void updateAllCalFinal (){
+        List<Proyecto> proyectos = proyectoRepository.findAll();
+        for (Proyecto proyecto : proyectos) {
+            if (proyecto.getCalTecnica() != null && proyecto.getCalOportunidad() != null && proyecto.getCalDisponibilidad() != null) {
+                Ponderaciones ponderaciones = ponderacionesRepository.findById(1)
+                        .orElseThrow(() -> new IllegalArgumentException("No se han encontrado las ponderaciones"));
+                double calFinal = proyecto.getCalTecnica() * ponderaciones.getPonTecnica() +
+                        proyecto.getCalOportunidad() * ponderaciones.getPonOportunidad() +
+                        proyecto.getCalDisponibilidad() * ponderaciones.getPonDisponibilidad();
+                proyecto.setCalFinal(calFinal);
+            }
+        }
+        proyectoRepository.saveAll(proyectos);
+    }
 }
