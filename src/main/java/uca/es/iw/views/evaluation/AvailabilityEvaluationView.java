@@ -12,13 +12,11 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import uca.es.iw.services.ProyectoService;
 import uca.es.iw.services.RecursosService;
@@ -27,7 +25,7 @@ import uca.es.iw.services.RecursosService;
 @Route("financialevaluation")
 @Menu(order = 9, icon = "line-awesome/svg/money-bill-solid.svg")
 @RolesAllowed({"CIO", "OTP"})
-public class FinancialEvaluationView extends Composite<VerticalLayout> {
+public class AvailabilityEvaluationView extends Composite<VerticalLayout> {
 
     @ClientCallable
     public void showNotification(String message) {
@@ -37,7 +35,7 @@ public class FinancialEvaluationView extends Composite<VerticalLayout> {
     private final ProyectoService proyectoService;
     private final RecursosService recursosService;
 
-    public FinancialEvaluationView(ProyectoService proyectoService, RecursosService recursosService) {
+    public AvailabilityEvaluationView(ProyectoService proyectoService, RecursosService recursosService) {
         this.proyectoService = proyectoService;
         this.recursosService = recursosService;
 
@@ -103,9 +101,9 @@ public class FinancialEvaluationView extends Composite<VerticalLayout> {
                 calificacionLabel.setVisible(true);
 
                 // Obtener la calificación de oportunidad desde el servicio (si existe)
-                Double calFinanciacion = proyectoService.getCalificacionFinanciacion(selectedProject);
-                if (calFinanciacion != null) {
-                    calificacionLabel.setText("Calificación de oportunidad: " + calFinanciacion);
+                Double calDisponibilidad = proyectoService.getCalificacionDisponibilidad(selectedProject);
+                if (calDisponibilidad != null) {
+                    calificacionLabel.setText("Calificación de oportunidad: " + calDisponibilidad);
                 } else {
                     calificacionLabel.setText("Calificación de oportunidad: Sin calificar");
                 }
@@ -176,20 +174,18 @@ public class FinancialEvaluationView extends Composite<VerticalLayout> {
 
             try {
                 // Obtener valores
-                int recursos = Integer.parseInt(recursosHumanos.getValue().toString());
-                double presupuesto = Double.parseDouble(presupuestoEstimado.getValue().toString());
+                double recursosDouble = recursosHumanos.getValue(); // Obtener el valor directamente como double
+                int recursos = (int) recursosDouble; // Convertir a int si es necesario
+                double presupuesto = presupuestoEstimado.getValue(); // Obtener el valor directamente como double
                 double presupuestoTotal = recursosService.getPresupuestoTotal();
                 double financiacionAportada = proyectoService.getFinanciacionAportada(selectedProject);
 
                 presupuesto -= financiacionAportada;
 
-                // Calcular puntuaciones
-                int puntuacionRecursos = calcularPuntuacionRecursos(recursos);
-                int puntuacionPresupuesto = calcularPuntuacionPresupuesto(presupuesto, presupuestoTotal);
+                double puntuacionRecursos = calcularPuntuacionRecursos(recursos);
+                double puntuacionPresupuesto = calcularPuntuacionPresupuesto(presupuesto, presupuestoTotal);
 
-                // Calificación total
-                int calificacion_ = (puntuacionRecursos + puntuacionPresupuesto);
-                Double calificacion = calificacion_/2.0;
+                double calificacion = (puntuacionRecursos + puntuacionPresupuesto);
 
                 // Guardar calificación
                 proyectoService.updateCalDisponibilidad(selectedProject, calificacion);
@@ -208,7 +204,7 @@ public class FinancialEvaluationView extends Composite<VerticalLayout> {
             }
         });
 
-        getContent().add(layoutColumn2);
+            getContent().add(layoutColumn2);
         layoutColumn2.add(formLayout2Col);
         formLayout2Col.add(comboBox);
         layoutColumn2.add(downloadMemoryButton, downloadSpecsButton, downloadBudgetButton);
@@ -221,12 +217,13 @@ public class FinancialEvaluationView extends Composite<VerticalLayout> {
         layoutColumn2.add(saveButton);
     }
 
-    private int calcularPuntuacionRecursos(int recursos) {
+    private double calcularPuntuacionRecursos(int recursos) {
         if (recursos >= 11) return 0;
-        return Math.max(0, 5 - recursos);
+        double calrec = Math.max(0, 11 - recursos);
+        return calrec / 2;
     }
 
-    private int calcularPuntuacionPresupuesto(double presupuesto, double presupuestoTotal) {
+    private double calcularPuntuacionPresupuesto(double presupuesto, double presupuestoTotal) {
         double porcentaje = (presupuesto / presupuestoTotal) * 100;
         if (presupuesto <= 0) return 5; // Financiación suficiente
         if (porcentaje < 3) return 5;
