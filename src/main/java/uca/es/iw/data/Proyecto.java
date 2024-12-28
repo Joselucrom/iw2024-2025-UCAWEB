@@ -92,14 +92,20 @@ public class Proyecto {
     @Column(name = "cal_disponibilidad", nullable = true, columnDefinition = "DECIMAL(10,2)")
     private Double calDisponibilidad;
 
-    @Column(name = "cal_financiacion", nullable = true, columnDefinition = "DECIMAL(10,2)")
-    private Double calFinanciacion;
-
     @Column(name = "cal_final", nullable = true, columnDefinition = "DECIMAL(10,2)")
     private Double calFinal;
 
     @Column(name = "estado", nullable = false, length = 10)
     private String estado;
+
+    @Column(name = "financiacion_necesaria", nullable = true, columnDefinition = "DECIMAL(10,2)")
+    private Double financiacionNecesaria;
+
+    @Column(name = "recursos_humanos_necesarios", nullable = true)
+    private Integer recursosHumanosNecesarios;
+
+    @Column(name = "calificado", nullable = false, columnDefinition="BOOLEAN DEFAULT false")
+    private Boolean calificado;
 
     // Getters y setters para cada atributo
 
@@ -311,14 +317,6 @@ public class Proyecto {
         this.calDisponibilidad = calDisponibilidad;
     }
 
-    public Double getCalFinanciacion() {
-        return calFinanciacion;
-    }
-
-    public void setCalFinanciacion(Double calFinanciacion) {
-        this.calFinanciacion = calFinanciacion;
-    }
-
     public Double getCalFinal() {
         return calFinal;
     }
@@ -341,5 +339,29 @@ public class Proyecto {
 
     public void setCalTecnica(Double calTecnica) {
         this.calTecnica = calTecnica;
+    }
+
+    public Double getFinanciacionNecesaria() {
+        return financiacionNecesaria;
+    }
+
+    public void setFinanciacionNecesaria(Double financiacionNecesaria) {
+        this.financiacionNecesaria = financiacionNecesaria;
+    }
+
+    public Integer getRecursosHumanosNecesarios() {
+        return recursosHumanosNecesarios;
+    }
+
+    public void setRecursosHumanosNecesarios(Integer recursosHumanosNecesarios) {
+        this.recursosHumanosNecesarios = recursosHumanosNecesarios;
+    }
+
+    public Boolean getCalificado() {
+        return calificado;
+    }
+
+    public void setCalificado(Boolean calificado) {
+        this.calificado = calificado;
     }
 }

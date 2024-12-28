@@ -131,6 +131,7 @@ public class ProyectoService {
                     proyecto.getCalOportunidad() * ponderaciones.getPonOportunidad() +
                     proyecto.getCalDisponibilidad() * ponderaciones.getPonDisponibilidad();
             proyecto.setCalFinal(calFinal);
+            proyecto.setCalificado(true);
         }
 
         proyecto.setCalTecnica(calTecnica);
@@ -148,6 +149,8 @@ public class ProyectoService {
                     calOportunidad * ponderaciones.getPonOportunidad() +
                     proyecto.getCalDisponibilidad() * ponderaciones.getPonDisponibilidad();
             proyecto.setCalFinal(calFinal);
+            proyecto.setCalificado(true);
+            System.out.println("Calificado se ha puesto a true");
         }
 
         proyecto.setCalOportunidad(calOportunidad);
@@ -204,8 +207,12 @@ public class ProyectoService {
         }
 
         return proyectoRepository.findAll(spec);
-
     }
+
+    public List<Proyecto> searchQualifiedProjects() {
+        return proyectoRepository.findByCalificadoTrue();
+    }
+
 
     public String getDownloadUrl(String nombreProyecto, int option) {
         return "/api/downloads?nombreProyecto=" + nombreProyecto + "&option=" + option;
@@ -239,7 +246,7 @@ public class ProyectoService {
         return proyecto.getFinanciacion();  // Devuelve la financiación aportada o null si no tiene
     }
 
-    public void updateCalDisponibilidad(String nombreCorto, Double calDisponibilidad) {
+    public void updateCalDisponibilidad(String nombreCorto, Double calDisponibilidad, int recursosHumanos, double financiacion) {
         Proyecto proyecto = proyectoRepository.findByNombreCorto(nombreCorto)
                 .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con nombre_corto: " + nombreCorto));
 
@@ -250,9 +257,12 @@ public class ProyectoService {
                     proyecto.getCalOportunidad() * ponderaciones.getPonOportunidad() +
                     calDisponibilidad * ponderaciones.getPonDisponibilidad();
             proyecto.setCalFinal(calFinal);
+            proyecto.setCalificado(true);
         }
 
         proyecto.setCalDisponibilidad(calDisponibilidad);
+        proyecto.setRecursosHumanosNecesarios(recursosHumanos);
+        proyecto.setFinanciacionNecesaria(financiacion);
         proyectoRepository.save(proyecto);
     }
 
