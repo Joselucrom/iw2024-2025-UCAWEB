@@ -15,7 +15,17 @@ public class RecursosService {
         return recursosRepository.findPresupuestoTotal();
     }
 
+    public Integer getRecursosHumanosTotal() {
+        return recursosRepository.findRecursosHumanosTotal();
+    }
 
+    public Double getPresupuestoRestante() {
+        return recursosRepository.findPresupuestoRestante();
+    }
+
+    public Integer getRecursosHumanosRestantes() {
+        return recursosRepository.findRecursosHumanosRestantes();
+    }
 
 
 }

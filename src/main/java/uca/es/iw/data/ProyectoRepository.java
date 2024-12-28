@@ -19,4 +19,7 @@ public interface ProyectoRepository extends JpaRepository<Proyecto, Long>, JpaSp
     List<String> findPendingProjects();
 
     Optional<Proyecto> findByNombreCorto(String nombreCorto);
+
+
+    List<Proyecto> findByCalificadoTrue();
 }
