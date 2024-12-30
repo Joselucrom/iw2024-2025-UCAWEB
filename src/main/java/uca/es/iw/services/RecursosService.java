@@ -1,14 +1,16 @@
 package uca.es.iw.services;
 
 import org.springframework.stereotype.Service;
-import uca.es.iw.data.RecursosRepository;
+import uca.es.iw.data.*;
 
 @Service
 public class RecursosService {
     private final RecursosRepository recursosRepository;
+    private final ProyectoRepository proyectoRepository;
 
-    public RecursosService(RecursosRepository recursosRepository) {
+    public RecursosService(RecursosRepository recursosRepository, ProyectoRepository proyectoRepository) {
         this.recursosRepository = recursosRepository;
+        this.proyectoRepository = proyectoRepository;
     }
 
     public Double getPresupuestoTotal() {
@@ -27,5 +29,15 @@ public class RecursosService {
         return recursosRepository.findRecursosHumanosRestantes();
     }
 
+    public Recursos findById(long id) {
+        return recursosRepository.findById(id).orElseGet(Recursos::new);
+    }
+
+    public void updateRecursosRestantes(double presupuestoRestante, int recursosRestantes) {
+        Recursos recursos = findById(1);
+        recursos.setPresupuestoRestante(presupuestoRestante);
+        recursos.setRecursosHumanosRestantes(recursosRestantes);
+        recursosRepository.save(recursos);
+    }
 
 }

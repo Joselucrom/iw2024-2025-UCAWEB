@@ -16,27 +16,35 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
+//import org.springframework.data.jpa.repository.Query;
 import uca.es.iw.data.Proyecto;
 import uca.es.iw.data.Recursos;
 import uca.es.iw.services.ProyectoService;
 import uca.es.iw.services.RecursosService;
+import com.vaadin.flow.data.provider.Query;
 
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @PageTitle("Selección de Proyectos")
 @Route("project-selection")
 @Menu(order = 11, icon = "line-awesome/svg/tasks-solid.svg")
-@RolesAllowed({"CIO", "OTP"})
+@RolesAllowed({"CIO"})
 public class ProjectSelectionView extends Composite<VerticalLayout> {
 
     private final ProyectoService proyectoService;
     private final RecursosService recursosService;
 
-    private final Span financiacionRestante = new Span("Financiación restante: 0.00 €");
+    private final Span financiacionRestante = new Span("Presupuesto restante: 0.00 €");
     private final Span recursosRestantes = new Span("Recursos humanos restantes: 0");
 
     private double totalFinanciacionRestante = 0.0;
     private int totalRecursosRestantes = 0;
+
+    private final Map<Long, String> selectedStatuses = new HashMap<>();
+
 
     public ProjectSelectionView(ProyectoService proyectoService, RecursosService recursosService) {
         this.proyectoService = proyectoService;
@@ -55,28 +63,44 @@ public class ProjectSelectionView extends Composite<VerticalLayout> {
         projectGrid.setWidthFull();
 
         projectGrid.addColumn(Proyecto::getNombreCorto).setHeader("Nombre").setSortable(true);
+        projectGrid.addColumn(Proyecto::getFinanciacionNecesaria).setHeader("Presupuesto necesario").setSortable(true);
+        projectGrid.addColumn(Proyecto::getRecursosHumanosNecesarios).setHeader("RRHH necesarios").setSortable(true);
         projectGrid.addColumn(Proyecto::getCalFinal).setHeader("Calificación Final").setSortable(true);
 
         // ComboBox en cada fila
         projectGrid.addComponentColumn(project -> {
             ComboBox<String> comboBox = new ComboBox<>();
-            comboBox.setItems("Aceptado", "Rechazado");
-            comboBox.setPlaceholder("Seleccionar");
+            comboBox.setItems("Pendiente", "Aceptado", "Rechazado");
+            comboBox.setValue(getProjectState(project)); // Mostrar el estado inicial del proyecto
+            comboBox.setId("combo-" + project.getId()); // Asignar un ID único al ComboBox
 
+            // Lógica de actualización
             comboBox.addValueChangeListener(event -> {
-                if ("Aceptado".equals(event.getValue())) {
-                    totalFinanciacionRestante -= project.getFinanciacionNecesaria();
-                    totalRecursosRestantes -= project.getRecursosHumanosNecesarios();
-                } else if ("Rechazado".equals(event.getValue())) {
-                    //totalFinanciacionRestante += project.getFinanciacionNecesaria();
-                    //totalRecursosRestantes += project.getRecursosHumanosNecesarios();
-                }
+                String oldValue = event.getOldValue();
+                String newValue = event.getValue();
 
+                if ("Aceptado".equals(newValue)) {
+                    if (!"Aceptado".equals(oldValue)) {
+                        totalFinanciacionRestante -= project.getFinanciacionNecesaria();
+                        totalRecursosRestantes -= project.getRecursosHumanosNecesarios();
+                    }
+                } else if ("Rechazado".equals(newValue)) {
+                    if ("Aceptado".equals(oldValue)) {
+                        totalFinanciacionRestante += project.getFinanciacionNecesaria();
+                        totalRecursosRestantes += project.getRecursosHumanosNecesarios();
+                    }
+                } else if ("Pendiente".equals(newValue)) {
+                    if ("Aceptado".equals(oldValue)) {
+                        totalFinanciacionRestante += project.getFinanciacionNecesaria();
+                        totalRecursosRestantes += project.getRecursosHumanosNecesarios();
+                    }
+                }
+                selectedStatuses.put(project.getId(), event.getValue());
                 updateStats();
             });
 
             return comboBox;
-        }).setHeader("Estado");
+        }).setHeader("Estado").setKey("Estado");
 
         content.add(projectGrid);
 
@@ -89,13 +113,50 @@ public class ProjectSelectionView extends Composite<VerticalLayout> {
 
         // Botón de guardar
         Button saveButton = new Button("Guardar Cambios", event -> {
-            Notification.show("Cambios guardados correctamente", 3000, Notification.Position.MIDDLE);
+            if (selectedStatuses.isEmpty()) {
+                Notification.show("No se han realizado cambios", 3000, Notification.Position.MIDDLE);
+                return;
+            }
+            if (totalFinanciacionRestante < 0) {
+                Notification.show("No hay suficiente financiación", 5000, Notification.Position.MIDDLE);
+                return;
+            }
+            if (totalRecursosRestantes < 0) {
+                Notification.show("No hay suficientes recursos humanos", 5000, Notification.Position.MIDDLE);
+                return;
+            }
+            try {
+                // Obtener los proyectos de la tabla
+                List<Proyecto> proyectos = projectGrid.getDataProvider().fetch(new Query<>()).toList();
+
+                for (Proyecto proyecto : proyectos) {
+                    // Obtener el estado seleccionado desde una estructura asociada
+                    String newStatus = selectedStatuses.get(proyecto.getId());
+                    if (newStatus != null) {
+                        proyectoService.updateProjectStatus(proyecto, newStatus);
+                    }
+                }
+
+                // Guardar recursos restantes
+                recursosService.updateRecursosRestantes(totalFinanciacionRestante, totalRecursosRestantes);
+
+                Notification.show("Cambios guardados correctamente", 3000, Notification.Position.MIDDLE);
+            } catch (Exception e) {
+                Notification.show("Error al guardar los cambios: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+            }
         });
+
+
 
         content.add(saveButton);
 
         // Cargar datos en la tabla
         loadProjects(projectGrid);
+    }
+
+    // Obtener el estado actual del proyecto
+    private String getProjectState(Proyecto project) {
+        return project.getEstado();
     }
 
     private void loadProjects(Grid<Proyecto> projectGrid) {

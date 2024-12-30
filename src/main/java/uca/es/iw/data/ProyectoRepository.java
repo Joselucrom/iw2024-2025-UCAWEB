@@ -22,4 +22,6 @@ public interface ProyectoRepository extends JpaRepository<Proyecto, Long>, JpaSp
 
 
     List<Proyecto> findByCalificadoTrue();
+
+    Optional<Proyecto> findById(long id);
 }

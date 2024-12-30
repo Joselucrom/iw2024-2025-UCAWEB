@@ -280,4 +280,22 @@ public class ProyectoService {
         }
         proyectoRepository.saveAll(proyectos);
     }
+
+    public void updateProjectStatus(Proyecto proyecto, String newStatus) {
+        switch (newStatus) {
+            case "Aceptado":
+                proyecto.setEstado("Aceptado");
+                break;
+            case "Rechazado":
+                proyecto.setEstado("Rechazado");
+                break;
+            case "Pendiente":
+                proyecto.setEstado("Pendiente");
+                break;
+            default:
+                throw new IllegalArgumentException("Estado inválido: " + newStatus);
+        }
+        save(proyecto);
+    }
+
 }
