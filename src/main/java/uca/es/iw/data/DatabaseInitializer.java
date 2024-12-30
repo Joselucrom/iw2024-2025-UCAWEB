@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Component
 public class DatabaseInitializer {
 
-    private final UserRepository userRepository;
+    /*private final UserRepository userRepository;
     private final RecursosRepository recursosRepository;
     private final PonderacionesRepository ponderacionesRepository;
     private final ProyectoRepository proyectoRepository;
@@ -119,6 +119,6 @@ public class DatabaseInitializer {
                 proyectoRepository.save(proyecto);
             }
         };
-    }
+    }*/
 }
 

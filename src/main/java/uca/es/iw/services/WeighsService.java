@@ -16,7 +16,7 @@ public class WeighsService {
         return ponderacionesRepository.save(ponderaciones);
     }
 
-    public Ponderaciones findById(int id) {
+    public Ponderaciones findById(long id) {
         return ponderacionesRepository.findById(id).orElseGet(Ponderaciones::new);
     }
 

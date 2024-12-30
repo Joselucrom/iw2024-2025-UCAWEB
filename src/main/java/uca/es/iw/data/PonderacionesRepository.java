@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.Optional;
 
 public interface PonderacionesRepository extends JpaRepository<Ponderaciones, Long>, JpaSpecificationExecutor<Ponderaciones> {
-    Optional<Ponderaciones> findById(int id);
+    Optional<Ponderaciones> findById(long id);
 }
