@@ -298,4 +298,10 @@ public class ProyectoService {
         save(proyecto);
     }
 
+    public Proyecto findById(long id) {
+        return proyectoRepository.findById(id).orElseGet(Proyecto::new);
+    }
+
+
+
 }

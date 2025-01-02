@@ -1,4 +1,4 @@
-package uca.es.iw.views.newproyect;
+package uca.es.iw.views.newproject;
 
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
@@ -315,11 +315,4 @@ public class NewProjectView extends Composite<VerticalLayout> {
 
         return upload;
     }
-
-
-
-
-
-
-
 }
