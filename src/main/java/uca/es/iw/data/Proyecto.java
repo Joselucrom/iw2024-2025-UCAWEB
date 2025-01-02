@@ -107,6 +107,9 @@ public class Proyecto {
     @Column(name = "calificado", nullable = false, columnDefinition="BOOLEAN DEFAULT false")
     private Boolean calificado;
 
+    @Column(name = "creado_id", nullable = false, columnDefinition="BIGINT")
+    private Long creadoId;
+
     // Getters y setters para cada atributo
 
     public Long getId() {
@@ -363,5 +366,13 @@ public class Proyecto {
 
     public void setCalificado(Boolean calificado) {
         this.calificado = calificado;
+    }
+
+    public Long getCreadoId() {
+        return creadoId;
+    }
+
+    public void setCreadoId(Long creadoId) {
+        this.creadoId = creadoId;
     }
 }
