@@ -143,7 +143,7 @@ public class ProyectoService {
     }
 
     private void validateProjectData(String titulo, String nombrecorto, byte[] memoria, String nombresolicitante, String correo, String unidad, String select, int importancia, String interesados, Double financiacion, String alcance, LocalDate fechaObjetivo, String normativa, List<String> selectedValues) {
-        if (titulo.isEmpty() || nombrecorto.isEmpty() || memoria == null || nombresolicitante.isEmpty() || correo.isEmpty() || unidad.isEmpty() || select.isEmpty() || importancia == 0 || interesados.isEmpty() || financiacion == 0 || alcance.isEmpty() || fechaObjetivo == null || normativa.isEmpty()) {
+        if (titulo.isEmpty() || nombrecorto.isEmpty() || memoria.length == 0 || nombresolicitante.isEmpty() || correo.isEmpty() || unidad.isEmpty() || select.isEmpty() || importancia <= 0 || interesados.isEmpty() || financiacion == 0 || alcance.isEmpty() || fechaObjetivo == null || normativa.isEmpty()) {
             throw new IllegalArgumentException("Por favor, complete todos los campos obligatorios marcados con asterisco.");
         }
         if (selectedValues.isEmpty()) {
