@@ -15,7 +15,7 @@ import uca.es.iw.services.WeighsService;
 
 @PageTitle("Editar Ponderaciones")
 @Route("editar-ponderaciones")
-@Menu(order = 10, icon = "line-awesome/svg/line-awesome/adjust-solid.svg")
+@Menu(order = 10, icon = "line-awesome/svg/line-awesome/edit.svg")
 @RolesAllowed({"CIO", "OTP"})
 public class WeighsView extends VerticalLayout {
 

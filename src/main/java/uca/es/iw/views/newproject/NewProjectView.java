@@ -215,7 +215,6 @@ public class NewProjectView extends Composite<VerticalLayout> {
                     normativa.getValue(),
                     checkboxGroup.getValue()
             );
-            UI.getCurrent().navigate("");
         });
 
         getContent().add(layoutColumn2);
@@ -276,7 +275,7 @@ public class NewProjectView extends Composite<VerticalLayout> {
         try {
             proyectoService.guardarProyecto(titulo, nombrecorto, memoriaData, nombresolicitante, correo, unidad, select, importancia, interesados, financiacion, alcance, fechaObjetivo, normativa, checkboxGroupList, especificacionesData, presupuestoData);
             Notification.show("Poryecto guardado con éxito.", 3000, Notification.Position.MIDDLE);
-
+            UI.getCurrent().navigate("");
 
         } catch (IllegalArgumentException e) {
             Notification.show(e.getMessage(), 3000, Notification.Position.MIDDLE);
