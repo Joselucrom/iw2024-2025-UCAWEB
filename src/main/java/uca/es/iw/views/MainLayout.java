@@ -184,7 +184,8 @@ public class MainLayout extends AppLayout {
 
             layout.add(userMenu);
         } else {
-            Anchor loginLink = new Anchor("login", "Sign in");
+            String signInText = getTranslation("menu.signin");
+            Anchor loginLink = new Anchor("login", signInText);
             layout.add(loginLink);
         }
 
@@ -247,11 +248,12 @@ public class MainLayout extends AppLayout {
         switch (className) {
             case "PerfilView":
                 return "perfil.titulo";
-            case "WelcomeView": // Caso para WelcomeView
+            case "LoginView": // Agregar soporte para LoginView
+                return "login.title";
+            case "WelcomeView":
                 return "welcome.title";
             default:
-                return "app.default_title"; // Título predeterminado
+                return "app.default_title";
         }
     }
-
 }
