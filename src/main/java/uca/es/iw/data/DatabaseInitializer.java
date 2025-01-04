@@ -118,7 +118,7 @@ public class DatabaseInitializer {
 
                 proyectoRepository.save(proyecto);
             }
-             */
+
         };
     }*/
 }
