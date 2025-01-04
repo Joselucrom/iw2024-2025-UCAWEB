@@ -1,4 +1,4 @@
-package uca.es.iw.views.newproyect;
+package uca.es.iw.views.newproject;
 
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
@@ -6,6 +6,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
@@ -16,7 +17,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
@@ -67,7 +67,7 @@ public class NewProjectView extends Composite<VerticalLayout> {
         Hr hr3 = new Hr();
         H2 h22 = new H2();
         Hr hr4 = new Hr();
-        Select select = new Select();
+        ComboBox<String> select = new ComboBox<>();
         NumberField importancia = new NumberField();
         Hr hr5 = new Hr();
         H2 h23 = new H2();
@@ -199,14 +199,14 @@ public class NewProjectView extends Composite<VerticalLayout> {
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         saveButton.addClickListener(event -> {
-            ProyectoService.SampleItem selectedItem = (ProyectoService.SampleItem) select.getValue(); // Realiza el casting aquí
+            //ProyectoService.SampleItem selectedItem = (ProyectoService.SampleItem) select.getValue(); // Realiza el casting aquí
             saveProject(
                     titulo.getValue(),
                     nombrecorto.getValue(),
                     nombresolicitante.getValue(),
                     correo.getValue(),
                     unidad.getValue(),
-                    selectedItem,
+                    select.getValue(),
                     importancia.getValue().intValue(),
                     interesados.getValue(),
                     financiacion.getValue(),
@@ -265,17 +265,17 @@ public class NewProjectView extends Composite<VerticalLayout> {
 
     }
 
-    private void saveProject(String titulo, String nombrecorto, String nombresolicitante, String correo, String unidad, ProyectoService.SampleItem select, int importancia, String interesados, Double financiacion, String alcance, LocalDate fechaObjetivo, String normativa, Object checkboxGroup) {
+    private void saveProject(String titulo, String nombrecorto, String nombresolicitante, String correo, String unidad, String select, int importancia, String interesados, Double financiacion, String alcance, LocalDate fechaObjetivo, String normativa, Object checkboxGroup) {
 
         List<String> checkboxGroupList = new ArrayList<>();
         checkboxGroupList.addAll(new ArrayList<>( (Set<String>) checkboxGroup ));
 
 
-        String selectedValue = select.label();
+        //String selectedValue = select.label();
 
         try {
-            proyectoService.guardarProyecto(titulo, nombrecorto, memoriaData, nombresolicitante, correo, unidad, selectedValue, importancia, interesados, financiacion, alcance, fechaObjetivo, normativa, checkboxGroupList, especificacionesData, presupuestoData);
-            Notification.show("Usuario guardado con éxito.", 3000, Notification.Position.MIDDLE);
+            proyectoService.guardarProyecto(titulo, nombrecorto, memoriaData, nombresolicitante, correo, unidad, select, importancia, interesados, financiacion, alcance, fechaObjetivo, normativa, checkboxGroupList, especificacionesData, presupuestoData);
+            Notification.show("Poryecto guardado con éxito.", 3000, Notification.Position.MIDDLE);
 
 
         } catch (IllegalArgumentException e) {
@@ -283,7 +283,7 @@ public class NewProjectView extends Composite<VerticalLayout> {
         } catch (Exception e) {
             System.err.println("Detalles del error: " + e.getCause());
             e.printStackTrace();
-            Notification.show("Ocurrió un error al guardar el usuario." + e.getMessage(), 3000, Notification.Position.MIDDLE);
+            Notification.show("Ocurrió un error al crear el proyecto." + e.getMessage(), 7000, Notification.Position.MIDDLE);
         }
     }
 
@@ -304,7 +304,7 @@ public class NewProjectView extends Composite<VerticalLayout> {
                 dataSetter.accept(fileData); // Guardar los datos en la variable correspondiente
                 Notification.show("Cargado correctamente.", 3000, Notification.Position.MIDDLE);
             } catch (IOException e) {
-                Notification.show("Error al cargar ", 3000, Notification.Position.MIDDLE);
+                Notification.show("Error al cargar ", 5000, Notification.Position.MIDDLE);
             }
         });
 
@@ -315,11 +315,4 @@ public class NewProjectView extends Composite<VerticalLayout> {
 
         return upload;
     }
-
-
-
-
-
-
-
 }

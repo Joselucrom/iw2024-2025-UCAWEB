@@ -21,6 +21,8 @@ import jakarta.annotation.security.RolesAllowed;
 import uca.es.iw.services.ProyectoService;
 import uca.es.iw.services.RecursosService;
 
+import static org.apache.commons.lang3.math.NumberUtils.max;
+
 @PageTitle("Evaluación financiera")
 @Route("financialevaluation")
 @Menu(order = 9, icon = "line-awesome/svg/money-bill-solid.svg")
@@ -188,7 +190,7 @@ public class AvailabilityEvaluationView extends Composite<VerticalLayout> {
                 double calificacion = (puntuacionRecursos + puntuacionPresupuesto);
 
                 // Guardar calificación
-                proyectoService.updateCalDisponibilidad(selectedProject, calificacion);
+                proyectoService.updateCalDisponibilidad(selectedProject, calificacion, recursos, max(0, presupuesto));
                 Notification.show("Calificación de disponibilidad guardada correctamente.", 3000, Notification.Position.MIDDLE);
 
                 // Mostrar la calificación en el Span
