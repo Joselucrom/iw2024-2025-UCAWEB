@@ -24,20 +24,22 @@ import uca.es.iw.data.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Set;
 import uca.es.iw.data.Role;
+import org.springframework.beans.factory.annotation.Autowired; // Import para la inyección
 
 
 @Service
 public class UserService {
 
     private final UserRepository repository;
-
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService; // Declaración de EmailService
 
     private static final String SPONSORS_URL = "https://e608f590-1a0b-43c5-b363-e5a883961765.mock.pstmn.io/sponsors";
-
-    public UserService(UserRepository repository, PasswordEncoder passwordEncoder) {
+    @Autowired
+    public UserService(UserRepository repository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public Optional<User> get(Long id) {
@@ -81,6 +83,7 @@ public class UserService {
         user.setProfilePicture(profilePicture);
 
         roleSetter(user, role);
+        sendWelcomeEmail(user);
         return repository.save(user);
     }
 
@@ -309,5 +312,14 @@ public class UserService {
             System.err.println("Error al procesar los datos del patrocinador: " + e.getMessage());
         }
         return false;
+    }
+    private void sendWelcomeEmail(User user) {
+        String subject = "¡Bienvenido a la plataforma!";
+        String body = "Hola " + user.getName() + ",\n\n" +
+                "Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión con tu nombre de usuario: " + user.getUsername() + ".\n\n" +
+                "¡Gracias por unirte!\n\n" +
+                "Saludos,\nEl equipo.";
+
+        emailService.sendEmail(user.getEmail(), subject, body);
     }
 }
