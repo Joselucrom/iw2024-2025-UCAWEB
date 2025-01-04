@@ -1,26 +1,27 @@
 package uca.es.iw.views.project;
 
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import uca.es.iw.data.Proyecto;
@@ -39,6 +40,11 @@ import java.util.function.Consumer;
 @RolesAllowed("USER")
 public class ProjectView extends Composite<VerticalLayout> implements BeforeEnterObserver {
 
+    @ClientCallable
+    public void showNotification(String message) {
+        Notification.show(message, 3000, Notification.Position.MIDDLE);
+    }
+
     private final ProyectoService proyectoService;
     private final AuthenticatedUser authenticatedUser;
     private Proyecto proyecto; // Proyecto actual
@@ -50,12 +56,13 @@ public class ProjectView extends Composite<VerticalLayout> implements BeforeEnte
     private byte[] especificacionesData;
     private byte[] presupuestoData;
 
+    private Long id = null;
     private final TextField titulo = new TextField();
     private final TextField nombrecorto = new TextField();
     private final TextField nombresolicitante = new TextField();
     private final TextField correo = new TextField();
     private final TextField unidad = new TextField();
-    private final Select select = new Select();
+    private final ComboBox<String> select = new ComboBox<>();
     private final NumberField importancia = new NumberField();
     private final TextField interesados = new TextField();
     private final NumberField financiacion = new NumberField();
@@ -67,56 +74,39 @@ public class ProjectView extends Composite<VerticalLayout> implements BeforeEnte
     private final Upload especificaciones = getUpload(data -> especificacionesData = data);
     private final Upload presupuesto = getUpload(data -> presupuestoData = data);
     private final Button saveButton = new Button();
+    private final Span estadoActual = new Span();
+    private final Span calificacion = new Span();
+    private final Span fechaCreacion = new Span();
 
     public ProjectView(ProyectoService proyectoService, AuthenticatedUser authenticatedUser) {
         this.proyectoService = proyectoService;
 
-        //String projectId = event.getRouteParameters().get("projectId").orElse(null);
-        //Proyecto proyecto = ProyectoService.findById(Long.parseLong(projectId));
-
         VerticalLayout layoutColumn2 = new VerticalLayout();
-        //TextField titulo = new TextField();
-        //TextField nombrecorto = new TextField();
-        //Upload memoria = getUpload(data -> memoriaData = data);
         Paragraph textSmall11 = new Paragraph();
         Hr hr = new Hr();
         H2 h2 = new H2();
         Hr hr2 = new Hr();
-        //TextField nombresolicitante = new TextField();
         Paragraph textMedium = new Paragraph();
-        //TextField correo = new TextField();
-        //TextField unidad = new TextField();
         Hr hr3 = new Hr();
         H2 h22 = new H2();
         Hr hr4 = new Hr();
-        //Select select = new Select();
-        //NumberField importancia = new NumberField();
         Hr hr5 = new Hr();
         H2 h23 = new H2();
         Hr hr6 = new Hr();
-        //TextField interesados = new TextField();
-        //NumberField financiacion = new NumberField();
         Paragraph textSmall10 = new Paragraph();
         Hr hr7 = new Hr();
         H2 h24 = new H2();
         Hr hr8 = new Hr();
-        //CheckboxGroup checkboxGroup = new CheckboxGroup();
         Paragraph textSmall = new Paragraph();
-        //TextField alcance = new TextField();
         Paragraph textSmall2 = new Paragraph();
-        //DatePicker fechaObjetivo = new DatePicker();
         Paragraph textSmall3 = new Paragraph();
-        //TextField normativa = new TextField();
         Paragraph textSmall4 = new Paragraph();
         Hr hr9 = new Hr();
         H2 h25 = new H2();
         Hr hr10 = new Hr();
         Paragraph textSmall5 = new Paragraph();
-        //Upload especificaciones = getUpload(data -> especificacionesData = data);
         Paragraph textSmall6 = new Paragraph();
-        //Upload presupuesto = getUpload(data -> presupuestoData = data);
         HorizontalLayout layoutRow = new HorizontalLayout();
-        //Button saveButton = new Button();
         getContent().setWidth("100%");
         getContent().getStyle().set("flex-grow", "1");
         getContent().setJustifyContentMode(FlexComponent.JustifyContentMode.START);
@@ -167,7 +157,56 @@ public class ProjectView extends Composite<VerticalLayout> implements BeforeEnte
                 "Generar valor compartido con la Comunidad Universitaria.",
                 "Reforzar la importancia del papel de la UCA en la sociedad.");
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        // Botones de descarga
+        Button downloadMemoryButton = new Button("Descargar memoria");
+        Button downloadSpecsButton = new Button("Descargar especificaciones técnicas");
+        Button downloadBudgetButton = new Button("Descargar presupuestos");
 
+        downloadMemoryButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        downloadSpecsButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        downloadBudgetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+
+        downloadMemoryButton.addClickListener(e -> {
+            String selectedProject = proyecto.getNombreCorto();
+            String downloadUrl = proyectoService.getDownloadUrl(selectedProject, 1);
+            // Validar si el archivo existe antes de abrir la pestaña
+            UI.getCurrent().getPage().executeJs(
+                    "fetch($0, { method: 'HEAD' }).then(response => { " +
+                            "if (response.ok) {" +
+                            "    window.open($0, '_blank');" +
+                            "} else {" +
+                            "    $1.$server.showNotification('La memoria no está disponible para el proyecto seleccionado.');" +
+                            "}});",
+                    downloadUrl, getElement());
+        });
+
+        downloadSpecsButton.addClickListener(e -> {
+            String selectedProject = proyecto.getNombreCorto();
+            String downloadUrl = proyectoService.getDownloadUrl(selectedProject, 2);
+            // Validar si el archivo existe antes de abrir la pestaña
+            UI.getCurrent().getPage().executeJs(
+                    "fetch($0, { method: 'HEAD' }).then(response => { " +
+                            "if (response.ok) {" +
+                            "    window.open($0, '_blank');" +
+                            "} else {" +
+                            "    $1.$server.showNotification('Las especificaciones no están disponibles para el proyecto seleccionado.');" +
+                            "}});",
+                    downloadUrl, getElement());
+        });
+
+        downloadBudgetButton.addClickListener(e -> {
+            String selectedProject = proyecto.getNombreCorto();
+            String downloadUrl = proyectoService.getDownloadUrl(selectedProject, 3);
+            // Validar si el archivo existe antes de abrir la pestaña
+            UI.getCurrent().getPage().executeJs(
+                    "fetch($0, { method: 'HEAD' }).then(response => { " +
+                            "if (response.ok) {" +
+                            "    window.open($0, '_blank');" +
+                            "} else {" +
+                            "    $1.$server.showNotification('Los presupuestos no están disponibles para el proyecto seleccionado.');" +
+                            "}});",
+                    downloadUrl, getElement());
+        });
 
         textSmall.setText(
                 "Su solicitud debe estar alineada con, al menos, uno de los anteriores objetivos estratégicos.");
@@ -216,19 +255,20 @@ public class ProjectView extends Composite<VerticalLayout> implements BeforeEnte
         layoutRow.addClassName(LumoUtility.Gap.MEDIUM);
         layoutRow.setWidth("100%");
         layoutRow.setHeight("min-content");
-        saveButton.setText("Enviar");
+        saveButton.setText("Actualizar proyecto");
         saveButton.setWidth("min-content");
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         saveButton.addClickListener(event -> {
-            ProyectoService.SampleItem selectedItem = (ProyectoService.SampleItem) select.getValue(); // Realiza el casting aquí
+            ProyectoService.SampleItem selectedItem = null;
             saveProject(
+                    id,
                     titulo.getValue(),
                     nombrecorto.getValue(),
                     nombresolicitante.getValue(),
                     correo.getValue(),
                     unidad.getValue(),
-                    selectedItem,
+                    select.getValue(),
                     importancia.getValue().intValue(),
                     interesados.getValue(),
                     financiacion.getValue(),
@@ -240,51 +280,15 @@ public class ProjectView extends Composite<VerticalLayout> implements BeforeEnte
             UI.getCurrent().navigate("");
         });
 
-        /*
-        //Rellenamos los datos del proyecto
-        titulo.setValue(proyecto.getTitulo());
-        nombrecorto.setValue(proyecto.getNombreCorto());
-        memoriaData = proyecto.getMemoria();
-        nombresolicitante.setValue(proyecto.getNombreSolicitante());
-        correo.setValue(proyecto.getCorreoSolicitante());
-        unidad.setValue(proyecto.getUnidadSolicitante());
-        //select.setValue(new ProyectoService.SampleItem(proyecto.getPromotor(), proyecto.getPromotor()));
-        importancia.setValue((double) proyecto.getImportancia());
-        interesados.setValue(proyecto.getInteresados());
-        financiacion.setValue(proyecto.getFinanciacion());
-        //checkboxGroup.setValue(Set.copyOf(proyecto.getAlineamiento()));
-        alcance.setValue(proyecto.getAlcance());
-        fechaObjetivo.setValue(proyecto.getFechaObjetivo());
-        normativa.setValue(proyecto.getNormativa());
-        especificacionesData = proyecto.getEspecificaciones();
-        presupuestoData = proyecto.getPresupuestos();
-
-        //Hacemos los campos no editables si no es el creador
-        titulo.setReadOnly(!isEditable);
-        nombrecorto.setReadOnly(!isEditable);
-        memoria.setVisible(isEditable);
-        nombresolicitante.setReadOnly(!isEditable);
-        correo.setReadOnly(!isEditable);
-        unidad.setReadOnly(!isEditable);
-        select.setReadOnly(!isEditable);
-        importancia.setReadOnly(!isEditable);
-        interesados.setReadOnly(!isEditable);
-        financiacion.setReadOnly(!isEditable);
-        checkboxGroup.setEnabled(isEditable);
-        alcance.setReadOnly(!isEditable);
-        fechaObjetivo.setReadOnly(!isEditable);
-        normativa.setReadOnly(!isEditable);
-        especificaciones.setVisible(isEditable);
-        presupuesto.setVisible(isEditable);
-        saveButton.setEnabled(isEditable);
-        */
-
-
         getContent().add(layoutColumn2);
         layoutColumn2.add(titulo);
         layoutColumn2.add(nombrecorto);
         layoutColumn2.add(textSmall11);
+        layoutColumn2.add(downloadMemoryButton);
         layoutColumn2.add(memoria);
+        layoutColumn2.add(estadoActual);
+        layoutColumn2.add(calificacion);
+        layoutColumn2.add(fechaCreacion);
         layoutColumn2.add(hr);
         layoutColumn2.add(h2);
         layoutColumn2.add(hr2);
@@ -318,8 +322,10 @@ public class ProjectView extends Composite<VerticalLayout> implements BeforeEnte
         layoutColumn2.add(h25);
         layoutColumn2.add(hr8);
         layoutColumn2.add(textSmall5);
+        layoutColumn2.add(downloadSpecsButton);
         layoutColumn2.add(especificaciones);
         layoutColumn2.add(textSmall6);
+        layoutColumn2.add(downloadBudgetButton);
         layoutColumn2.add(presupuesto);
         layoutColumn2.add(layoutRow);
         layoutRow.add(saveButton);
@@ -349,25 +355,63 @@ public class ProjectView extends Composite<VerticalLayout> implements BeforeEnte
                 return;
             }
 
-            //Long currentUserId = (Long) VaadinSession.getCurrent().getAttribute("userId");
-            System.out.println("currentUserId: " + currentUserId);
+            //System.out.println("currentUserId: " + currentUserId);
             isEditable = proyecto.getCreadoId().equals(currentUserId);
 
             // Configurar valores en los campos después de cargar el proyecto
+            id = proyecto.getId();
             titulo.setValue(proyecto.getTitulo());
             nombrecorto.setValue(proyecto.getNombreCorto());
-            memoriaData = proyecto.getMemoria();
+            //memoriaData = proyecto.getMemoria();
             nombresolicitante.setValue(proyecto.getNombreSolicitante());
             correo.setValue(proyecto.getCorreoSolicitante());
             unidad.setValue(proyecto.getUnidadSolicitante());
             importancia.setValue((double) proyecto.getImportancia());
+            select.setValue(proyecto.getPromotor());
             interesados.setValue(proyecto.getInteresados());
             financiacion.setValue(proyecto.getFinanciacion());
             alcance.setValue(proyecto.getAlcance());
             fechaObjetivo.setValue(proyecto.getFechaObjetivo());
             normativa.setValue(proyecto.getNormativa());
-            especificacionesData = proyecto.getEspecificaciones();
-            presupuestoData = proyecto.getPresupuestos();
+            //especificacionesData = proyecto.getEspecificaciones();
+            //presupuestoData = proyecto.getPresupuestos();
+            estadoActual.setText("Estado actual: " + proyecto.getEstado());
+            if (proyecto.getCalFinal() == null) {
+                calificacion.setText("Calificación: No calificado");
+            } else
+                calificacion.setText("Calificación: " + proyecto.getCalFinal());
+
+            fechaCreacion.setText("Fecha de creación: " + proyecto.getFechaCreado());
+
+            boolean aoe1 = proyecto.getAoe1();
+            boolean aoe2 = proyecto.getAoe2();
+            boolean aoe3 = proyecto.getAoe3();
+            boolean aoe4 = proyecto.getAoe4();
+            boolean aoe5 = proyecto.getAoe5();
+            boolean aoe6 = proyecto.getAoe6();
+            boolean aoe7 = proyecto.getAoe7();
+
+            if (aoe1) {
+                checkboxGroup.select("Innovar, rediseñar y atualizar nuestra oferta formativa para adaptarla a las necesidades sociales y económicas de nuestro entorno.");
+            }
+            if (aoe2) {
+                checkboxGroup.select("Conseguir los niveles más altos de calidad en nuestra oferta formativa propia y reglada.");
+            }
+            if (aoe3) {
+                checkboxGroup.select("Aumentar significativamente nuestro posicidonamiento en investigación y transferir de forma relevante y útil nuestra investigación a nuestro tejido social y productivo.");
+            }
+            if (aoe4) {
+                checkboxGroup.select("Consolidar un modelo de gobierno sostenible y socialmente responsable.");
+            }
+            if (aoe5) {
+                checkboxGroup.select("Conseguir que la transparencia sea un valor distintivo y relevante en la UCA.");
+            }
+            if (aoe6) {
+                checkboxGroup.select("Generar valor compartido con la Comunidad Universitaria.");
+            }
+            if (aoe7) {
+                checkboxGroup.select("Reforzar la importancia del papel de la UCA en la sociedad.");
+            }
 
             // Ajustar los campos según la editabilidad
             setFieldsEditable(isEditable);
@@ -402,17 +446,15 @@ public class ProjectView extends Composite<VerticalLayout> implements BeforeEnte
 
 
 
-    private void saveProject(String titulo, String nombrecorto, String nombresolicitante, String correo, String unidad, ProyectoService.SampleItem select, int importancia, String interesados, Double financiacion, String alcance, LocalDate fechaObjetivo, String normativa, Object checkboxGroup) {
+    private void saveProject(Long id, String titulo, String nombrecorto, String nombresolicitante, String correo, String unidad, String select, int importancia, String interesados, Double financiacion, String alcance, LocalDate fechaObjetivo, String normativa, Object checkboxGroup) {
 
         List<String> checkboxGroupList = new ArrayList<>();
         checkboxGroupList.addAll(new ArrayList<>( (Set<String>) checkboxGroup ));
 
 
-        String selectedValue = select.label();
-
         try {
-            proyectoService.guardarProyecto(titulo, nombrecorto, memoriaData, nombresolicitante, correo, unidad, selectedValue, importancia, interesados, financiacion, alcance, fechaObjetivo, normativa, checkboxGroupList, especificacionesData, presupuestoData);
-            Notification.show("Usuario guardado con éxito.", 3000, Notification.Position.MIDDLE);
+            proyectoService.updateProject(id, titulo, nombrecorto, memoriaData, nombresolicitante, correo, unidad, select, importancia, interesados, financiacion, alcance, fechaObjetivo, normativa, checkboxGroupList, especificacionesData, presupuestoData);
+            Notification.show("Proyecto actualizado con éxito.", 3000, Notification.Position.MIDDLE);
 
 
         } catch (IllegalArgumentException e) {
@@ -420,7 +462,7 @@ public class ProjectView extends Composite<VerticalLayout> implements BeforeEnte
         } catch (Exception e) {
             System.err.println("Detalles del error: " + e.getCause());
             e.printStackTrace();
-            Notification.show("Ocurrió un error al guardar el usuario." + e.getMessage(), 3000, Notification.Position.MIDDLE);
+            Notification.show("Ocurrió un error al actualizar el proyecto." + e.getMessage(), 7000, Notification.Position.MIDDLE);
         }
     }
 
