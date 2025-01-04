@@ -11,12 +11,15 @@ import java.util.Optional;
 public interface ProyectoRepository extends JpaRepository<Proyecto, Long>, JpaSpecificationExecutor<Proyecto> {
     @Query(value = """
 
-            SELECT nombre_corto
+    SELECT nombre_corto
     FROM Proyecto
-    WHERE estado = 'Pendiente'
+    WHERE estado = 'PENDIENTE'
     ORDER BY nombre_corto ASC;
     """, nativeQuery = true)
     List<String> findPendingProjects();
 
     Optional<Proyecto> findByNombreCorto(String nombreCorto);
+
+    List<Proyecto> findByPromotorAndEstado(String promotor, String estado);
+
 }
