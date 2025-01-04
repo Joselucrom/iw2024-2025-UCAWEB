@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class DatabaseInitializer {
-
-    /*private final UserRepository userRepository;
+    /*
+    private final UserRepository userRepository;
     private final RecursosRepository recursosRepository;
     private final PonderacionesRepository ponderacionesRepository;
     private final ProyectoRepository proyectoRepository;
@@ -29,6 +29,7 @@ public class DatabaseInitializer {
 
     @Bean
     public CommandLineRunner initDatabase() {
+
         return args -> {
             // Crear usuario "user" con rol USER
             User normalUser = new User();
@@ -82,7 +83,6 @@ public class DatabaseInitializer {
             ponderaciones.setPonOportunidad(0.3);
             ponderaciones.setPonTecnica(0.3);
             ponderacionesRepository.save(ponderaciones);
-            /*
             // Generar datos aleatorios para proyectos
             for (int i = 1; i <= 10; i++) {
                 Proyecto proyecto = new Proyecto();
@@ -118,8 +118,8 @@ public class DatabaseInitializer {
 
                 proyectoRepository.save(proyecto);
             }
-             */
         };
-    }*/
+    }
+    */
 }
 
