@@ -260,7 +260,6 @@ public class ProjectView extends Composite<VerticalLayout> implements BeforeEnte
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         saveButton.addClickListener(event -> {
-            ProyectoService.SampleItem selectedItem = null;
             saveProject(
                     id,
                     titulo.getValue(),
@@ -277,7 +276,6 @@ public class ProjectView extends Composite<VerticalLayout> implements BeforeEnte
                     normativa.getValue(),
                     checkboxGroup.getValue()
             );
-            UI.getCurrent().navigate("");
         });
 
         getContent().add(layoutColumn2);
@@ -455,6 +453,7 @@ public class ProjectView extends Composite<VerticalLayout> implements BeforeEnte
         try {
             proyectoService.updateProject(id, titulo, nombrecorto, memoriaData, nombresolicitante, correo, unidad, select, importancia, interesados, financiacion, alcance, fechaObjetivo, normativa, checkboxGroupList, especificacionesData, presupuestoData);
             Notification.show("Proyecto actualizado con éxito.", 3000, Notification.Position.MIDDLE);
+            UI.getCurrent().navigate("");
 
 
         } catch (IllegalArgumentException e) {

@@ -37,7 +37,7 @@ public class ProyectoService {
 
     public Proyecto guardarProyecto(String titulo, String nombrecorto, byte[] memoria, String nombresolicitante, String correo, String unidad, String select, int importancia, String interesados, Double financiacion, String alcance, LocalDate fechaObjetivo, String normativa, List<String> selectedValues, byte[] especificaciones, byte[] presupuesto) {
         validateProjectData(titulo, nombrecorto, memoria, nombresolicitante, correo, unidad, select, importancia, interesados, financiacion, alcance, fechaObjetivo, normativa, selectedValues);
-        String estado = "Pendiente";
+        String estado = "PENDIENTE";
 
         boolean AOE1 = selectedValues.contains("Innovar, rediseñar y atualizar nuestra oferta formativa para adaptarla a las necesidades sociales y económicas de nuestro entorno.");
         boolean AOE2 = selectedValues.contains("Conseguir los niveles más altos de calidad en nuestra oferta formativa propia y reglada.");
@@ -143,7 +143,7 @@ public class ProyectoService {
     }
 
     private void validateProjectData(String titulo, String nombrecorto, byte[] memoria, String nombresolicitante, String correo, String unidad, String select, int importancia, String interesados, Double financiacion, String alcance, LocalDate fechaObjetivo, String normativa, List<String> selectedValues) {
-        if (titulo.isEmpty() || nombrecorto.isEmpty() || memoria == null || nombresolicitante.isEmpty() || correo.isEmpty() || unidad.isEmpty() || select.isEmpty() || importancia == 0 || interesados.isEmpty() || financiacion == 0 || alcance.isEmpty() || fechaObjetivo == null || normativa.isEmpty()) {
+        if (titulo.isEmpty() || nombrecorto.isEmpty() || memoria.length == 0 || nombresolicitante.isEmpty() || correo.isEmpty() || unidad.isEmpty() || select.isEmpty() || importancia <= 0 || interesados.isEmpty() || financiacion == 0 || alcance.isEmpty() || fechaObjetivo == null || normativa.isEmpty()) {
             throw new IllegalArgumentException("Por favor, complete todos los campos obligatorios marcados con asterisco.");
         }
         if (selectedValues.isEmpty()) {
@@ -369,7 +369,5 @@ public class ProyectoService {
     public Proyecto findById(long id) {
         return proyectoRepository.findById(id).orElseGet(Proyecto::new);
     }
-
-
 
 }
