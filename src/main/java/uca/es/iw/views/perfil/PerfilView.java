@@ -2,6 +2,7 @@ package uca.es.iw.views.perfil;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.notification.Notification;
@@ -19,8 +20,6 @@ import uca.es.iw.security.AuthenticatedUser;
 import uca.es.iw.data.User;
 import uca.es.iw.services.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import uca.es.iw.views.MainLayout;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +37,7 @@ public class PerfilView extends VerticalLayout {
     // Campos del formulario
     private final TextField username = new TextField();
     private final TextField fullName = new TextField();
+    private final TextField email = new TextField();
     private final TextField roles = new TextField();
     private final PasswordField password = new PasswordField();
     private final Image profilePicture = new Image();
@@ -59,6 +59,7 @@ public class PerfilView extends VerticalLayout {
             fullName.setValue(user.getName());
             roles.setValue(user.getRoles().toString());
             roles.setReadOnly(true);
+            email.setValue(user.getEmail());
             if (user.getProfilePicture() != null && user.getProfilePicture().length > 0) {
                 profilePicture.setSrc(new StreamResource("profile-pic",
                         () -> new ByteArrayInputStream(user.getProfilePicture())));
@@ -107,12 +108,24 @@ public class PerfilView extends VerticalLayout {
                 getUI().ifPresent(ui -> ui.getPage().reload());
             });
         });
-
-        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        // Botón para eliminar datos personales
+        Button deletePersonalDataButton = new Button(
+                i18nProvider.getTranslation("perfil.eliminar_datos", getLocale()),
+                event -> showConfirmationDialog(
+                        i18nProvider.getTranslation("perfil.eliminar_datos_confirmacion", getLocale()),
+                        () -> maybeUser.ifPresent(user -> {
+                            userService.deletePersonalData(user);
+                            Notification.show(i18nProvider.getTranslation("perfil.datos_eliminados", getLocale()));
+                            getUI().ifPresent(ui -> ui.getPage().reload());
+                        })
+                )
+        );
+        deletePersonalDataButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         // Etiquetas de los campos con traducción
         username.setLabel(i18nProvider.getTranslation("perfil.nombre_usuario", getLocale()));
         fullName.setLabel(i18nProvider.getTranslation("perfil.nombre_completo", getLocale()));
         roles.setLabel(i18nProvider.getTranslation("perfil.rol_usuario", getLocale()));
+        email.setLabel(i18nProvider.getTranslation("perfil.correo_electronico", getLocale()));
         password.setLabel(i18nProvider.getTranslation("perfil.nueva_contrasena", getLocale()));
         // Diseño
         setWidth("100%");
@@ -121,7 +134,8 @@ public class PerfilView extends VerticalLayout {
         fullName.setWidth("100%");
         password.setWidth("100%");
         roles.setWidth("100%");
-        add(username, fullName, roles, password, profilePicture, imageUpload, saveButton);
+        email.setWidth("100%");
+        add(username, fullName, email, password, roles, profilePicture, imageUpload, saveButton, deletePersonalDataButton);
     }
     private boolean validarCampos(I18NProvider i18nProvider) {
         if (username.getValue().isEmpty() || fullName.getValue().isEmpty()) {
@@ -132,5 +146,17 @@ public class PerfilView extends VerticalLayout {
     }
     private String encriptarContraseña(String password) {
         return passwordEncoder.encode(password);
+    }
+    private void showConfirmationDialog(String message, Runnable onConfirm) {
+        Dialog confirmationDialog = new Dialog();
+        confirmationDialog.add(new H1(message));
+        Button confirmButton = new Button(i18nProvider.getTranslation("perfil.confirmar", getLocale()), event -> {
+            onConfirm.run();
+            confirmationDialog.close();
+        });
+        confirmButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        Button cancelButton = new Button(i18nProvider.getTranslation("perfil.cancelar", getLocale()), event -> confirmationDialog.close());
+        confirmationDialog.add(confirmButton, cancelButton);
+        confirmationDialog.open();
     }
 }

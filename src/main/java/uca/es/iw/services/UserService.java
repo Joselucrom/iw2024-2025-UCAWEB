@@ -322,4 +322,10 @@ public class UserService {
 
         emailService.sendEmail(user.getEmail(), subject, body);
     }
+    public void deletePersonalData(User user) {
+        user.setName("");
+        user.setProfilePicture(null);
+        user.setEmail("");
+        repository.save(user);
+    }
 }
