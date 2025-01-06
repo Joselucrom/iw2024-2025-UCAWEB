@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
@@ -28,29 +29,34 @@ import java.util.List;
 public class ConvocatoriaView extends VerticalLayout {
 
     private final ConvocatoriaService convocatoriaService;
+    private final I18NProvider i18nProvider;
 
     private final Grid<Convocatoria> convocatoriaGrid = new Grid<>(Convocatoria.class, false);
-    private final TextField nombreField = new TextField("Nombre de la convocatoria");
-    private final TextField objetivoField = new TextField("Objetivo");
-    private final DatePicker fechaInicioField = new DatePicker("Fecha de inicio");
-    private final DatePicker fechaFinField = new DatePicker("Fecha de fin");
-    private final NumberField presupuestoField = new NumberField("Presupuesto (€)");
-    private final NumberField recursosHumanosField = new NumberField("Recursos Humanos");
-    private final Button saveButton = new Button("Guardar", event -> saveConvocatoria());
-    private final Button clearButton = new Button("Limpiar", event -> clearForm());
+    private final TextField nombreField = new TextField();
+    private final TextField objetivoField = new TextField();
+    private final DatePicker fechaInicioField = new DatePicker();
+    private final DatePicker fechaFinField = new DatePicker();
+    private final NumberField presupuestoField = new NumberField();
+    private final NumberField recursosHumanosField = new NumberField();
+    private final Button saveButton;
+    private final Button clearButton;
 
     private Long editingId = null; // Modo edición
 
     @Autowired
-    public ConvocatoriaView(ConvocatoriaService convocatoriaService) {
+    public ConvocatoriaView(ConvocatoriaService convocatoriaService, I18NProvider i18nProvider) {
         this.convocatoriaService = convocatoriaService;
+        this.i18nProvider = i18nProvider;
+
+        // Establecer título de la página traducido
+        getUI().ifPresent(ui -> ui.getPage().setTitle(i18nProvider.getTranslation("convocatoria.titulo", getLocale())));
 
         // Configuración de diseño
         setWidth("100%");
         setAlignItems(FlexComponent.Alignment.CENTER);
 
         // Título
-        H3 title = new H3("Gestión de Convocatorias");
+        H3 title = new H3(i18nProvider.getTranslation("convocatoria.titulo", getLocale()));
         add(title);
 
         // Campos del formulario
@@ -61,7 +67,19 @@ public class ConvocatoriaView extends VerticalLayout {
         presupuestoField.setWidth("100%");
         recursosHumanosField.setWidth("100%");
 
-        // Botones en fila
+        // Configurar campos del formulario con traducción
+        nombreField.setLabel(i18nProvider.getTranslation("convocatoria.nombre", getLocale()));
+        objetivoField.setLabel(i18nProvider.getTranslation("convocatoria.objetivo", getLocale()));
+        fechaInicioField.setLabel(i18nProvider.getTranslation("convocatoria.fecha_inicio", getLocale()));
+        fechaFinField.setLabel(i18nProvider.getTranslation("convocatoria.fecha_fin", getLocale()));
+        presupuestoField.setLabel(i18nProvider.getTranslation("convocatoria.presupuesto", getLocale()));
+        recursosHumanosField.setLabel(i18nProvider.getTranslation("convocatoria.recursos_humanos", getLocale()));
+
+        // Configuración de botones con traducción
+        saveButton = new Button(i18nProvider.getTranslation("convocatoria.guardar", getLocale()), event -> saveConvocatoria());
+        clearButton = new Button(i18nProvider.getTranslation("convocatoria.limpiar", getLocale()), event -> clearForm());
+
+        // Diseño de botones
         HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, clearButton);
         buttonsLayout.setWidthFull();
         buttonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
@@ -78,32 +96,34 @@ public class ConvocatoriaView extends VerticalLayout {
         loadConvocatorias();
     }
 
-
     private void configureGrid() {
-        convocatoriaGrid.addColumn(Convocatoria::getNombre).setHeader("Nombre").setSortable(true);
-        convocatoriaGrid.addColumn(Convocatoria::getObjetivo).setHeader("Objetivo").setSortable(true);
-        convocatoriaGrid.addColumn(Convocatoria::getFechaApertura).setHeader("Fecha de Inicio").setSortable(true);
-        convocatoriaGrid.addColumn(Convocatoria::getFechaCierre).setHeader("Fecha de Fin").setSortable(true);
-        convocatoriaGrid.addColumn(Convocatoria::getPresupuestoTotal).setHeader("Presupuesto (€)").setSortable(true);
-        convocatoriaGrid.addColumn(Convocatoria::getCupoRecursosHumanos).setHeader("RRHH").setSortable(true);
+        convocatoriaGrid.addColumn(Convocatoria::getNombre)
+                .setHeader(i18nProvider.getTranslation("convocatoria.grid.nombre", getLocale()))
+                .setSortable(true);
+        convocatoriaGrid.addColumn(Convocatoria::getObjetivo)
+                .setHeader(i18nProvider.getTranslation("convocatoria.grid.objetivo", getLocale()))
+                .setSortable(true);
+        convocatoriaGrid.addColumn(Convocatoria::getFechaApertura)
+                .setHeader(i18nProvider.getTranslation("convocatoria.grid.fecha_inicio", getLocale()))
+                .setSortable(true);
+        convocatoriaGrid.addColumn(Convocatoria::getFechaCierre)
+                .setHeader(i18nProvider.getTranslation("convocatoria.grid.fecha_fin", getLocale()))
+                .setSortable(true);
+        convocatoriaGrid.addColumn(Convocatoria::getPresupuestoTotal)
+                .setHeader(i18nProvider.getTranslation("convocatoria.grid.presupuesto", getLocale()))
+                .setSortable(true);
+        convocatoriaGrid.addColumn(Convocatoria::getCupoRecursosHumanos)
+                .setHeader(i18nProvider.getTranslation("convocatoria.grid.recursos_humanos", getLocale()))
+                .setSortable(true);
         convocatoriaGrid.addComponentColumn(convocatoria -> {
-            // Crear botones con clases personalizadas
-            Button editButton = new Button("Editar", event ->
+            Button editButton = new Button(i18nProvider.getTranslation("convocatoria.grid.editar", getLocale()), event ->
                     UI.getCurrent().navigate(ModifyConvocatoriaView.class, convocatoria.getId()));
-            editButton.addClassName("action-button");
-
-            Button deleteButton = new Button("Eliminar", event ->
+            Button deleteButton = new Button(i18nProvider.getTranslation("convocatoria.grid.eliminar", getLocale()), event ->
                     deleteConvocatoria(convocatoria));
-            deleteButton.addClassName("action-button");
-
-            // Añadir a un HorizontalLayout para alineación en fila
-            HorizontalLayout actionLayout = new HorizontalLayout(editButton, deleteButton);
-            actionLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-            actionLayout.setClassName("action-layout");
-
-            return actionLayout;
-        }).setHeader("Acciones");
+            return new HorizontalLayout(editButton, deleteButton);
+        }).setHeader(i18nProvider.getTranslation("convocatoria.grid.acciones", getLocale()));
     }
+
     private void loadConvocatorias() {
         List<Convocatoria> convocatorias = convocatoriaService.getAllConvocatorias();
         convocatoriaGrid.setItems(convocatorias);
@@ -120,7 +140,7 @@ public class ConvocatoriaView extends VerticalLayout {
                         presupuestoField.getValue(),
                         recursosHumanosField.getValue().intValue()
                 );
-                Notification.show("Convocatoria creada con éxito.");
+                Notification.show(i18nProvider.getTranslation("convocatoria.notificacion.creada", getLocale()));
             } else {
                 convocatoriaService.updateConvocatoria(
                         editingId,
@@ -131,33 +151,23 @@ public class ConvocatoriaView extends VerticalLayout {
                         presupuestoField.getValue(),
                         recursosHumanosField.getValue().intValue()
                 );
-                Notification.show("Convocatoria actualizada con éxito.");
+                Notification.show(i18nProvider.getTranslation("convocatoria.notificacion.actualizada", getLocale()));
                 editingId = null;
             }
             clearForm();
             loadConvocatorias();
         } catch (Exception e) {
-            Notification.show("Error al guardar la convocatoria: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("convocatoria.notificacion.error", getLocale(), e.getMessage()), 5000, Notification.Position.MIDDLE);
         }
-    }
-
-    private void editConvocatoria(Convocatoria convocatoria) {
-        editingId = convocatoria.getId();
-        nombreField.setValue(convocatoria.getNombre());
-        objetivoField.setValue(convocatoria.getObjetivo());
-        fechaInicioField.setValue(convocatoria.getFechaApertura());
-        fechaFinField.setValue(convocatoria.getFechaCierre());
-        presupuestoField.setValue(convocatoria.getPresupuestoTotal());
-        recursosHumanosField.setValue((double) convocatoria.getCupoRecursosHumanos());
     }
 
     private void deleteConvocatoria(Convocatoria convocatoria) {
         try {
             convocatoriaService.deleteConvocatoria(convocatoria.getId());
-            Notification.show("Convocatoria eliminada con éxito.");
+            Notification.show(i18nProvider.getTranslation("convocatoria.notificacion.eliminada", getLocale()));
             loadConvocatorias();
         } catch (Exception e) {
-            Notification.show("Error al eliminar la convocatoria: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("convocatoria.notificacion.error", getLocale(), e.getMessage()), 5000, Notification.Position.MIDDLE);
         }
     }
 
