@@ -7,6 +7,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -60,8 +61,13 @@ public class ConvocatoriaView extends VerticalLayout {
         presupuestoField.setWidth("100%");
         recursosHumanosField.setWidth("100%");
 
+        // Botones en fila
+        HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, clearButton);
+        buttonsLayout.setWidthFull();
+        buttonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+
         // Diseño del formulario
-        add(nombreField, objetivoField, fechaInicioField, fechaFinField, presupuestoField, recursosHumanosField, saveButton, clearButton);
+        add(nombreField, objetivoField, fechaInicioField, fechaFinField, presupuestoField, recursosHumanosField, buttonsLayout);
 
         // Configuración del grid
         configureGrid();
@@ -72,6 +78,7 @@ public class ConvocatoriaView extends VerticalLayout {
         loadConvocatorias();
     }
 
+
     private void configureGrid() {
         convocatoriaGrid.addColumn(Convocatoria::getNombre).setHeader("Nombre").setSortable(true);
         convocatoriaGrid.addColumn(Convocatoria::getObjetivo).setHeader("Objetivo").setSortable(true);
@@ -80,15 +87,23 @@ public class ConvocatoriaView extends VerticalLayout {
         convocatoriaGrid.addColumn(Convocatoria::getPresupuestoTotal).setHeader("Presupuesto (€)").setSortable(true);
         convocatoriaGrid.addColumn(Convocatoria::getCupoRecursosHumanos).setHeader("RRHH").setSortable(true);
         convocatoriaGrid.addComponentColumn(convocatoria -> {
-            Button editButton = new Button("Editar", event -> {
-                UI.getCurrent().navigate(ModifyConvocatoriaView.class, convocatoria.getId());
-            });
-            Button deleteButton = new Button("Eliminar", event -> deleteConvocatoria(convocatoria));
-            return new VerticalLayout(editButton, deleteButton);
+            // Crear botones con clases personalizadas
+            Button editButton = new Button("Editar", event ->
+                    UI.getCurrent().navigate(ModifyConvocatoriaView.class, convocatoria.getId()));
+            editButton.addClassName("action-button");
+
+            Button deleteButton = new Button("Eliminar", event ->
+                    deleteConvocatoria(convocatoria));
+            deleteButton.addClassName("action-button");
+
+            // Añadir a un HorizontalLayout para alineación en fila
+            HorizontalLayout actionLayout = new HorizontalLayout(editButton, deleteButton);
+            actionLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+            actionLayout.setClassName("action-layout");
+
+            return actionLayout;
         }).setHeader("Acciones");
     }
-
-
     private void loadConvocatorias() {
         List<Convocatoria> convocatorias = convocatoriaService.getAllConvocatorias();
         convocatoriaGrid.setItems(convocatorias);
