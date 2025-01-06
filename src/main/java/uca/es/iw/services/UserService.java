@@ -328,4 +328,8 @@ public class UserService {
         user.setEmail("");
         repository.save(user);
     }
+    public List<User> getAllUsers() {
+        return repository.findAll(); // Recupera todos los usuarios de la base de datos
+    }
+
 }
