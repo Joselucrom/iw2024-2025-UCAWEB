@@ -134,6 +134,7 @@ public class MainLayout extends AppLayout {
             // Determinar la clave de traducción según la ruta o clase de vista
             String translationKey = switch (entry.title()) {
                 case "WelcomeView" -> "welcome.title";
+                case "ConvocatoriaView" -> "convocatoria.titulo";
                 default -> null; // No asigna clave de traducción predeterminada
             };
             // Si hay una clave de traducción, intenta obtener la traducción; de lo contrario, usa el título original
@@ -252,6 +253,8 @@ public class MainLayout extends AppLayout {
                 return "login.title";
             case "WelcomeView":
                 return "welcome.title";
+            case "ConvocatoriaView": // Nueva vista para gestión de convocatorias
+                return "convocatoria.titulo";
             default:
                 return "app.default_title";
         }
