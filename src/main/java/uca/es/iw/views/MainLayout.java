@@ -134,8 +134,8 @@ public class MainLayout extends AppLayout {
             // Determinar la clave de traducción según la ruta o clase de vista
             String translationKey = switch (entry.title()) {
                 case "WelcomeView" -> "welcome.title";
-                case "ConvocatoriaView" -> "convocatoria.titulo";
-                default -> null; // No asigna clave de traducción predeterminada
+                case "ConvocatoriaView" -> "call.title";
+                default -> null;
             };
             // Si hay una clave de traducción, intenta obtener la traducción; de lo contrario, usa el título original
             String translatedTitle = (translationKey != null)
@@ -178,14 +178,14 @@ public class MainLayout extends AppLayout {
             div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
             userName.add(div);
 
-            String viewProfileText = getTranslation("menu.viewProfile");
+            String viewProfileText = getTranslation("menu.view_profile");
             String logoutText = getTranslation("menu.logout");
             userName.getSubMenu().addItem(viewProfileText, e -> getUI().ifPresent(ui -> ui.navigate("perfil")));
             userName.getSubMenu().addItem(logoutText, e -> authenticatedUser.logout());
 
             layout.add(userMenu);
         } else {
-            String signInText = getTranslation("menu.signin");
+            String signInText = getTranslation("menu.sign_in");
             Anchor loginLink = new Anchor("login", signInText);
             layout.add(loginLink);
         }
@@ -248,13 +248,13 @@ public class MainLayout extends AppLayout {
         String className = getContent().getClass().getSimpleName();
         switch (className) {
             case "PerfilView":
-                return "perfil.titulo";
-            case "LoginView": // Agregar soporte para LoginView
+                return "profile.title";
+            case "LoginView":
                 return "login.title";
             case "WelcomeView":
                 return "welcome.title";
-            case "ConvocatoriaView": // Nueva vista para gestión de convocatorias
-                return "convocatoria.titulo";
+            case "ConvocatoriaView":
+                return "call.title";
             default:
                 return "app.default_title";
         }
