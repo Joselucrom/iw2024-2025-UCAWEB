@@ -41,7 +41,7 @@ public class ConvocatoriaView extends VerticalLayout {
     private final Button saveButton;
     private final Button clearButton;
 
-    private Long editingId = null; // Modo edición
+    private Long editingId = null;
 
     @Autowired
     public ConvocatoriaView(ConvocatoriaService convocatoriaService, I18NProvider i18nProvider) {
@@ -49,14 +49,14 @@ public class ConvocatoriaView extends VerticalLayout {
         this.i18nProvider = i18nProvider;
 
         // Establecer título de la página traducido
-        getUI().ifPresent(ui -> ui.getPage().setTitle(i18nProvider.getTranslation("convocatoria.titulo", getLocale())));
+        getUI().ifPresent(ui -> ui.getPage().setTitle(i18nProvider.getTranslation("call.title", getLocale())));
 
         // Configuración de diseño
         setWidth("100%");
         setAlignItems(FlexComponent.Alignment.CENTER);
 
         // Título
-        H3 title = new H3(i18nProvider.getTranslation("convocatoria.titulo", getLocale()));
+        H3 title = new H3(i18nProvider.getTranslation("call.title", getLocale()));
         add(title);
 
         // Campos del formulario
@@ -68,16 +68,16 @@ public class ConvocatoriaView extends VerticalLayout {
         recursosHumanosField.setWidth("100%");
 
         // Configurar campos del formulario con traducción
-        nombreField.setLabel(i18nProvider.getTranslation("convocatoria.nombre", getLocale()));
-        objetivoField.setLabel(i18nProvider.getTranslation("convocatoria.objetivo", getLocale()));
-        fechaInicioField.setLabel(i18nProvider.getTranslation("convocatoria.fecha_inicio", getLocale()));
-        fechaFinField.setLabel(i18nProvider.getTranslation("convocatoria.fecha_fin", getLocale()));
-        presupuestoField.setLabel(i18nProvider.getTranslation("convocatoria.presupuesto", getLocale()));
-        recursosHumanosField.setLabel(i18nProvider.getTranslation("convocatoria.recursos_humanos", getLocale()));
+        nombreField.setLabel(i18nProvider.getTranslation("call.name", getLocale()));
+        objetivoField.setLabel(i18nProvider.getTranslation("call.objective", getLocale()));
+        fechaInicioField.setLabel(i18nProvider.getTranslation("call.start_date", getLocale()));
+        fechaFinField.setLabel(i18nProvider.getTranslation("call.end_date", getLocale()));
+        presupuestoField.setLabel(i18nProvider.getTranslation("call.budget", getLocale()));
+        recursosHumanosField.setLabel(i18nProvider.getTranslation("call.human_resources", getLocale()));
 
         // Configuración de botones con traducción
-        saveButton = new Button(i18nProvider.getTranslation("convocatoria.guardar", getLocale()), event -> saveConvocatoria());
-        clearButton = new Button(i18nProvider.getTranslation("convocatoria.limpiar", getLocale()), event -> clearForm());
+        saveButton = new Button(i18nProvider.getTranslation("call.save", getLocale()), event -> saveConvocatoria());
+        clearButton = new Button(i18nProvider.getTranslation("call.clear", getLocale()), event -> clearForm());
 
         // Diseño de botones
         HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, clearButton);
@@ -98,30 +98,30 @@ public class ConvocatoriaView extends VerticalLayout {
 
     private void configureGrid() {
         convocatoriaGrid.addColumn(Convocatoria::getNombre)
-                .setHeader(i18nProvider.getTranslation("convocatoria.grid.nombre", getLocale()))
+                .setHeader(i18nProvider.getTranslation("call.grid.name", getLocale()))
                 .setSortable(true);
         convocatoriaGrid.addColumn(Convocatoria::getObjetivo)
-                .setHeader(i18nProvider.getTranslation("convocatoria.grid.objetivo", getLocale()))
+                .setHeader(i18nProvider.getTranslation("call.grid.objective", getLocale()))
                 .setSortable(true);
         convocatoriaGrid.addColumn(Convocatoria::getFechaApertura)
-                .setHeader(i18nProvider.getTranslation("convocatoria.grid.fecha_inicio", getLocale()))
+                .setHeader(i18nProvider.getTranslation("call.grid.start_date", getLocale()))
                 .setSortable(true);
         convocatoriaGrid.addColumn(Convocatoria::getFechaCierre)
-                .setHeader(i18nProvider.getTranslation("convocatoria.grid.fecha_fin", getLocale()))
+                .setHeader(i18nProvider.getTranslation("call.grid.end_date", getLocale()))
                 .setSortable(true);
         convocatoriaGrid.addColumn(Convocatoria::getPresupuestoTotal)
-                .setHeader(i18nProvider.getTranslation("convocatoria.grid.presupuesto", getLocale()))
+                .setHeader(i18nProvider.getTranslation("call.grid.budget", getLocale()))
                 .setSortable(true);
         convocatoriaGrid.addColumn(Convocatoria::getCupoRecursosHumanos)
-                .setHeader(i18nProvider.getTranslation("convocatoria.grid.recursos_humanos", getLocale()))
+                .setHeader(i18nProvider.getTranslation("call.grid.human_resources", getLocale()))
                 .setSortable(true);
         convocatoriaGrid.addComponentColumn(convocatoria -> {
-            Button editButton = new Button(i18nProvider.getTranslation("convocatoria.grid.editar", getLocale()), event ->
+            Button editButton = new Button(i18nProvider.getTranslation("call.grid.edit", getLocale()), event ->
                     UI.getCurrent().navigate(ModifyConvocatoriaView.class, convocatoria.getId()));
-            Button deleteButton = new Button(i18nProvider.getTranslation("convocatoria.grid.eliminar", getLocale()), event ->
+            Button deleteButton = new Button(i18nProvider.getTranslation("call.grid.delete", getLocale()), event ->
                     deleteConvocatoria(convocatoria));
             return new HorizontalLayout(editButton, deleteButton);
-        }).setHeader(i18nProvider.getTranslation("convocatoria.grid.acciones", getLocale()));
+        }).setHeader(i18nProvider.getTranslation("call.grid.actions", getLocale()));
     }
 
     private void loadConvocatorias() {
@@ -140,7 +140,7 @@ public class ConvocatoriaView extends VerticalLayout {
                         presupuestoField.getValue(),
                         recursosHumanosField.getValue().intValue()
                 );
-                Notification.show(i18nProvider.getTranslation("convocatoria.notificacion.creada", getLocale()));
+                Notification.show(i18nProvider.getTranslation("call.notification.created", getLocale()));
             } else {
                 convocatoriaService.updateConvocatoria(
                         editingId,
@@ -151,23 +151,23 @@ public class ConvocatoriaView extends VerticalLayout {
                         presupuestoField.getValue(),
                         recursosHumanosField.getValue().intValue()
                 );
-                Notification.show(i18nProvider.getTranslation("convocatoria.notificacion.actualizada", getLocale()));
+                Notification.show(i18nProvider.getTranslation("call.notification.updated", getLocale()));
                 editingId = null;
             }
             clearForm();
             loadConvocatorias();
         } catch (Exception e) {
-            Notification.show(i18nProvider.getTranslation("convocatoria.notificacion.error", getLocale(), e.getMessage()), 5000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("call.notification.error", getLocale(), e.getMessage()), 5000, Notification.Position.MIDDLE);
         }
     }
 
     private void deleteConvocatoria(Convocatoria convocatoria) {
         try {
             convocatoriaService.deleteConvocatoria(convocatoria.getId());
-            Notification.show(i18nProvider.getTranslation("convocatoria.notificacion.eliminada", getLocale()));
+            Notification.show(i18nProvider.getTranslation("call.notification.deleted", getLocale()));
             loadConvocatorias();
         } catch (Exception e) {
-            Notification.show(i18nProvider.getTranslation("convocatoria.notificacion.error", getLocale(), e.getMessage()), 5000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("call.notification.error", getLocale(), e.getMessage()), 5000, Notification.Position.MIDDLE);
         }
     }
 

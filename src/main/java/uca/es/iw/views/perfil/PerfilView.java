@@ -50,7 +50,7 @@ public class PerfilView extends VerticalLayout {
         this.passwordEncoder = passwordEncoder;
         this.i18nProvider = i18nProvider;
         // Establecer el título de la página, que luego se pasará al MainLayout
-        getUI().ifPresent(ui -> ui.getPage().setTitle(i18nProvider.getTranslation("perfil.titulo", getLocale())));
+        getUI().ifPresent(ui -> ui.getPage().setTitle(i18nProvider.getTranslation("profile.title", getLocale())));
         // Configurar campos iniciales
         Optional<User> maybeUser = authenticatedUser.get();
         if (maybeUser.isPresent()) {
@@ -78,14 +78,14 @@ public class PerfilView extends VerticalLayout {
                 uploadedImage = inputStream.readAllBytes();
                 profilePicture.setSrc(new StreamResource("profile-pic",
                         () -> new ByteArrayInputStream(uploadedImage)));
-                Notification.show(i18nProvider.getTranslation("perfil.imagen_cargada", getLocale()));
+                Notification.show(i18nProvider.getTranslation("profile.image_uploaded", getLocale()));
             } catch (IOException e) {
-                Notification.show(i18nProvider.getTranslation("perfil.error_imagen", getLocale(), e.getMessage()));
+                Notification.show(i18nProvider.getTranslation("profile.image_error", getLocale(), e.getMessage()));
             }
         });
         password.getElement().setAttribute("autocomplete", "new-password");
         // Botón para guardar cambios
-        Button saveButton = new Button(i18nProvider.getTranslation("perfil.guardar_cambios", getLocale()), event -> {
+        Button saveButton = new Button(i18nProvider.getTranslation("profile.save_changes", getLocale()), event -> {
             if (!validarCampos(i18nProvider)) {
                 return;
             }
@@ -104,29 +104,29 @@ public class PerfilView extends VerticalLayout {
                 // Reautenticar al usuario con los datos actualizados
                 authenticatedUser.reauthenticate(user);
 
-                Notification.show(i18nProvider.getTranslation("perfil.perfil_actualizado", getLocale()));
+                Notification.show(i18nProvider.getTranslation("profile.update_profile", getLocale()));
                 getUI().ifPresent(ui -> ui.getPage().reload());
             });
         });
         // Botón para eliminar datos personales
         Button deletePersonalDataButton = new Button(
-                i18nProvider.getTranslation("perfil.eliminar_datos", getLocale()),
+                i18nProvider.getTranslation("profile.delete_data", getLocale()),
                 event -> showConfirmationDialog(
-                        i18nProvider.getTranslation("perfil.eliminar_datos_confirmacion", getLocale()),
+                        i18nProvider.getTranslation("profile.delete_data_confirmation", getLocale()),
                         () -> maybeUser.ifPresent(user -> {
                             userService.deletePersonalData(user);
-                            Notification.show(i18nProvider.getTranslation("perfil.datos_eliminados", getLocale()));
+                            Notification.show(i18nProvider.getTranslation("profile.data_deleted", getLocale()));
                             getUI().ifPresent(ui -> ui.getPage().reload());
                         })
                 )
         );
         deletePersonalDataButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         // Etiquetas de los campos con traducción
-        username.setLabel(i18nProvider.getTranslation("perfil.nombre_usuario", getLocale()));
-        fullName.setLabel(i18nProvider.getTranslation("perfil.nombre_completo", getLocale()));
-        roles.setLabel(i18nProvider.getTranslation("perfil.rol_usuario", getLocale()));
-        email.setLabel(i18nProvider.getTranslation("perfil.correo_electronico", getLocale()));
-        password.setLabel(i18nProvider.getTranslation("perfil.nueva_contrasena", getLocale()));
+        username.setLabel(i18nProvider.getTranslation("profile.username", getLocale()));
+        fullName.setLabel(i18nProvider.getTranslation("profile.full_name", getLocale()));
+        roles.setLabel(i18nProvider.getTranslation("profile.user_role", getLocale()));
+        email.setLabel(i18nProvider.getTranslation("profile.email", getLocale()));
+        password.setLabel(i18nProvider.getTranslation("profile.new_password", getLocale()));
         // Diseño
         setWidth("100%");
         setAlignItems(Alignment.CENTER);
@@ -139,7 +139,7 @@ public class PerfilView extends VerticalLayout {
     }
     private boolean validarCampos(I18NProvider i18nProvider) {
         if (username.getValue().isEmpty() || fullName.getValue().isEmpty()) {
-            Notification.show(i18nProvider.getTranslation("perfil.campos_invalidos", getLocale()));
+            Notification.show(i18nProvider.getTranslation("profile.invalid_fields", getLocale()));
             return false;
         }
         return true;
@@ -150,12 +150,12 @@ public class PerfilView extends VerticalLayout {
     private void showConfirmationDialog(String message, Runnable onConfirm) {
         Dialog confirmationDialog = new Dialog();
         confirmationDialog.add(new H1(message));
-        Button confirmButton = new Button(i18nProvider.getTranslation("perfil.confirmar", getLocale()), event -> {
+        Button confirmButton = new Button(i18nProvider.getTranslation("profile.confirm", getLocale()), event -> {
             onConfirm.run();
             confirmationDialog.close();
         });
         confirmButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        Button cancelButton = new Button(i18nProvider.getTranslation("perfil.cancelar", getLocale()), event -> confirmationDialog.close());
+        Button cancelButton = new Button(i18nProvider.getTranslation("profile.cancel", getLocale()), event -> confirmationDialog.close());
         confirmationDialog.add(confirmButton, cancelButton);
         confirmationDialog.open();
     }
