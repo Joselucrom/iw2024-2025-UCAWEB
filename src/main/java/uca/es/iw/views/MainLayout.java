@@ -180,7 +180,7 @@ public class MainLayout extends AppLayout {
 
             String viewProfileText = getTranslation("menu.view_profile");
             String logoutText = getTranslation("menu.logout");
-            userName.getSubMenu().addItem(viewProfileText, e -> getUI().ifPresent(ui -> ui.navigate("perfil")));
+            userName.getSubMenu().addItem(viewProfileText, e -> getUI().ifPresent(ui -> ui.navigate("profile")));
             userName.getSubMenu().addItem(logoutText, e -> authenticatedUser.logout());
 
             layout.add(userMenu);
@@ -247,7 +247,7 @@ public class MainLayout extends AppLayout {
     private String getCurrentPageTitle() {
         String className = getContent().getClass().getSimpleName();
         switch (className) {
-            case "PerfilView":
+            case "ProfileView":
                 return "profile.title";
             case "LoginView":
                 return "login.title";

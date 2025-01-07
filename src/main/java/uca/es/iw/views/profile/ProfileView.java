@@ -1,4 +1,4 @@
-package uca.es.iw.views.perfil;
+package uca.es.iw.views.profile;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -25,9 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
-@Route(value = "perfil", layout = uca.es.iw.views.MainLayout.class)
+@Route(value = "profile", layout = uca.es.iw.views.MainLayout.class)
 @RolesAllowed("USER")
-public class PerfilView extends VerticalLayout {
+public class ProfileView extends VerticalLayout {
 
     private final AuthenticatedUser authenticatedUser;
     private final UserService userService;
@@ -44,7 +44,7 @@ public class PerfilView extends VerticalLayout {
     private final Upload imageUpload;
     private byte[] uploadedImage;
     @Autowired
-    public PerfilView(AuthenticatedUser authenticatedUser, UserService userService, PasswordEncoder passwordEncoder, I18NProvider i18nProvider) {
+    public ProfileView(AuthenticatedUser authenticatedUser, UserService userService, PasswordEncoder passwordEncoder, I18NProvider i18nProvider) {
         this.authenticatedUser = authenticatedUser;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
