@@ -20,60 +20,58 @@ import uca.es.iw.data.Convocatoria;
 import uca.es.iw.data.Proyecto;
 import uca.es.iw.services.ProyectoService;
 import uca.es.iw.services.RecursosService;
+import com.vaadin.flow.i18n.I18NProvider;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@PageTitle("Selección de Proyectos")
-@Route("project-selection")
+@Route(value = "project-selection", layout = uca.es.iw.views.MainLayout.class)
 @Menu(order = 11, icon = "line-awesome/svg/tasks-solid.svg")
 @RolesAllowed({"CIO"})
 public class ProjectSelectionView extends VerticalLayout {
 
     private final ProyectoService proyectoService;
     private final RecursosService recursosService;
+    private final I18NProvider i18nProvider;
 
-    private final ComboBox<Convocatoria> convocatoriaComboBox = new ComboBox<>("Seleccionar Convocatoria");
-    private final Span financiacionRestante = new Span("Presupuesto restante: 0.00 €");
-    private final Span recursosRestantes = new Span("Recursos humanos restantes: 0");
+    private final ComboBox<Convocatoria> convocatoriaComboBox = new ComboBox<>();
+    private final Span financiacionRestante = new Span();
+    private final Span recursosRestantes = new Span();
 
-    private final Grid<Proyecto> projectGrid = new Grid<>(Proyecto.class, false); // Mover Grid aquí
+    private final Grid<Proyecto> projectGrid = new Grid<>(Proyecto.class, false);
 
     private double totalFinanciacionRestante = 0.0;
     private int totalRecursosRestantes = 0;
     private final Map<Long, String> selectedStatuses = new HashMap<>();
 
-    public ProjectSelectionView(ProyectoService proyectoService, RecursosService recursosService) {
+    public ProjectSelectionView(ProyectoService proyectoService, RecursosService recursosService, I18NProvider i18nProvider) {
         this.proyectoService = proyectoService;
         this.recursosService = recursosService;
+        this.i18nProvider = i18nProvider;
 
         setWidth("100%");
         setAlignItems(FlexComponent.Alignment.CENTER);
 
-        H2 title = new H2("Selección de Proyectos");
+        H2 title = new H2(i18nProvider.getTranslation("project_selection.title", getLocale()));
         add(title);
 
-        // Configuración del ComboBox
+        convocatoriaComboBox.setLabel(i18nProvider.getTranslation("project_selection.select_convocatoria", getLocale()));
         convocatoriaComboBox.setItemLabelGenerator(Convocatoria::getNombre);
         convocatoriaComboBox.setItems(proyectoService.getAllConvocatorias());
         convocatoriaComboBox.addValueChangeListener(event -> loadProjects(event.getValue()));
         add(convocatoriaComboBox);
 
-        // Configuración del Grid
         configureProjectGrid();
         add(projectGrid);
 
-        // Layout para estadísticas
         HorizontalLayout statsLayout = new HorizontalLayout(financiacionRestante, recursosRestantes);
         statsLayout.setWidthFull();
         statsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.AROUND);
         add(statsLayout);
 
-        // Botón para guardar cambios
-        Button saveButton = new Button("Guardar Cambios", event -> saveChanges());
+        Button saveButton = new Button(i18nProvider.getTranslation("project_selection.save", getLocale()), event -> saveChanges());
         add(saveButton);
 
-        // Cargar proyectos iniciales
         loadProjects(null);
     }
 
@@ -85,15 +83,25 @@ public class ProjectSelectionView extends VerticalLayout {
             Anchor anchor = new Anchor(String.format("project-view/%s", proyecto.getId()), proyecto.getNombreCorto());
             anchor.getElement().setAttribute("theme", "tertiary");
             return anchor;
-        })).setHeader("Título").setAutoWidth(true);
+        })).setHeader(i18nProvider.getTranslation("project_selection.title", getLocale())).setAutoWidth(true);
 
-        projectGrid.addColumn(Proyecto::getFinanciacionNecesaria).setHeader("Presupuesto necesario").setSortable(true);
-        projectGrid.addColumn(Proyecto::getRecursosHumanosNecesarios).setHeader("RRHH necesarios").setSortable(true);
-        projectGrid.addColumn(Proyecto::getCalFinal).setHeader("Calificación Final").setSortable(true);
+        projectGrid.addColumn(Proyecto::getFinanciacionNecesaria)
+                .setHeader(i18nProvider.getTranslation("project_selection.budget_needed", getLocale()))
+                .setSortable(true);
+        projectGrid.addColumn(Proyecto::getRecursosHumanosNecesarios)
+                .setHeader(i18nProvider.getTranslation("project_selection.human_resources_needed", getLocale()))
+                .setSortable(true);
+        projectGrid.addColumn(Proyecto::getCalFinal)
+                .setHeader(i18nProvider.getTranslation("project_selection.final_grade", getLocale()))
+                .setSortable(true);
 
         projectGrid.addComponentColumn(project -> {
             ComboBox<String> comboBox = new ComboBox<>();
-            comboBox.setItems("Pendiente", "Aceptado", "Rechazado");
+            comboBox.setItems(
+                    i18nProvider.getTranslation("project_selection.pending", getLocale()),
+                    i18nProvider.getTranslation("project_selection.accepted", getLocale()),
+                    i18nProvider.getTranslation("project_selection.rejected", getLocale())
+            );
             comboBox.setValue(getProjectState(project));
 
             comboBox.addValueChangeListener(event -> {
@@ -102,7 +110,7 @@ public class ProjectSelectionView extends VerticalLayout {
             });
 
             return comboBox;
-        }).setHeader("Estado");
+        }).setHeader(i18nProvider.getTranslation("project_selection.state", getLocale()));
     }
 
     private void loadProjects(Convocatoria convocatoria) {
@@ -140,21 +148,21 @@ public class ProjectSelectionView extends VerticalLayout {
     }
 
     private void updateStats() {
-        financiacionRestante.setText(String.format("Financiación restante: %.2f €", totalFinanciacionRestante));
-        recursosRestantes.setText("Recursos humanos restantes: " + totalRecursosRestantes);
+        financiacionRestante.setText(String.format(i18nProvider.getTranslation("project_selection.remaining_budget", getLocale()), totalFinanciacionRestante));
+        recursosRestantes.setText(i18nProvider.getTranslation("project_selection.remaining_resources", getLocale()) + totalRecursosRestantes);
     }
 
     private void saveChanges() {
         if (selectedStatuses.isEmpty()) {
-            Notification.show("No se han realizado cambios", 3000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("project_selection.no_changes", getLocale()), 3000, Notification.Position.MIDDLE);
             return;
         }
         if (totalFinanciacionRestante < 0) {
-            Notification.show("No hay suficiente financiación", 5000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("project_selection.not_enough_funding", getLocale()), 5000, Notification.Position.MIDDLE);
             return;
         }
         if (totalRecursosRestantes < 0) {
-            Notification.show("No hay suficientes recursos humanos", 5000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("project_selection.not_enough_resources", getLocale()), 5000, Notification.Position.MIDDLE);
             return;
         }
 
@@ -167,9 +175,9 @@ public class ProjectSelectionView extends VerticalLayout {
                         }
                     });
             recursosService.updateRecursosRestantes(totalFinanciacionRestante, totalRecursosRestantes);
-            Notification.show("Cambios guardados correctamente", 3000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("project_selection.save_success", getLocale()), 3000, Notification.Position.MIDDLE);
         } catch (Exception e) {
-            Notification.show("Error al guardar los cambios: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("project_selection.save_error", getLocale()) + e.getMessage(), 5000, Notification.Position.MIDDLE);
         }
     }
 }

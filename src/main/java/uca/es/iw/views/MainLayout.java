@@ -134,6 +134,7 @@ public class MainLayout extends AppLayout {
             // Determinar la clave de traducción según la ruta o clase de vista
             String translationKey = switch (entry.title()) {
                 case "WelcomeView" -> "welcome.title";
+                case "ProjectSelectionView" -> "project_selection.title";
                 case "NewProjectView" -> "new_project.title";
                 case "ExplorarProyectosView" -> "explorar_proyectos.title";
                 case "AddUserView" -> "add_user.title";
@@ -256,6 +257,8 @@ public class MainLayout extends AppLayout {
     private String getCurrentPageTitle() {
         String className = getContent().getClass().getSimpleName();
         switch (className) {
+            case "ProjectSelectionView":
+                return "project_selection.title";
             case "TechnicalEvaluationView":
                 return "technical_evaluation.title";
             case "AvailabilityEvaluationView":
