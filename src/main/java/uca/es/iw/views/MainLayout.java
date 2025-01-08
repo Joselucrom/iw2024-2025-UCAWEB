@@ -136,6 +136,7 @@ public class MainLayout extends AppLayout {
                 case "WelcomeView" -> "welcome.title";
                 case "NewProjectView" -> "new_project.title";
                 case "ExplorarProyectosView" -> "explorar_proyectos.title";
+                case "AddUserView" -> "add_user.page_title";
                 case "MisProyectosView" -> "mis_proyectos.titulo";
                 case "CallView" -> "call.title";
                 default -> null;
@@ -250,6 +251,8 @@ public class MainLayout extends AppLayout {
     private String getCurrentPageTitle() {
         String className = getContent().getClass().getSimpleName();
         switch (className) {
+            case "AddUserView":
+                return "add_user.page_title";
             case "MisProyectosView":
                 return "mis_proyectos.titulo";
             case "ExplorarProyectosView":

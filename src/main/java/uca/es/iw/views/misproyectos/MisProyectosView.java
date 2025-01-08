@@ -8,7 +8,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.router.Menu;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import uca.es.iw.data.ProyectoRepository;
 import uca.es.iw.data.UserRepository;
 
 import java.util.List;
-import java.util.Locale;
 
 @Route(value = "mis-proyectos", layout = uca.es.iw.views.MainLayout.class)
 @Menu(order = 4, icon = "line-awesome/svg/file.svg")
