@@ -1,4 +1,4 @@
-package uca.es.iw.views.gestionarconvocatorias;
+package uca.es.iw.views.managecall;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -19,14 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uca.es.iw.data.Convocatoria;
 import uca.es.iw.services.ConvocatoriaService;
 import uca.es.iw.views.MainLayout;
-import uca.es.iw.views.modconvocatoria.ModifyConvocatoriaView;
+import uca.es.iw.views.modcall.ModifyCallView;
 
 import java.util.List;
 
 @Route(value = "convocatoria-management", layout = MainLayout.class)
 @Menu(order = 2, icon = "line-awesome/svg/calendar.svg")
 @RolesAllowed("ADMIN")
-public class ConvocatoriaView extends VerticalLayout {
+public class CallView extends VerticalLayout {
 
     private final ConvocatoriaService convocatoriaService;
     private final I18NProvider i18nProvider;
@@ -44,7 +44,7 @@ public class ConvocatoriaView extends VerticalLayout {
     private Long editingId = null;
 
     @Autowired
-    public ConvocatoriaView(ConvocatoriaService convocatoriaService, I18NProvider i18nProvider) {
+    public CallView(ConvocatoriaService convocatoriaService, I18NProvider i18nProvider) {
         this.convocatoriaService = convocatoriaService;
         this.i18nProvider = i18nProvider;
 
@@ -93,7 +93,7 @@ public class ConvocatoriaView extends VerticalLayout {
         add(convocatoriaGrid);
 
         // Cargar convocatorias
-        loadConvocatorias();
+        loadCalls();
     }
 
     private void configureGrid() {
@@ -117,14 +117,14 @@ public class ConvocatoriaView extends VerticalLayout {
                 .setSortable(true);
         convocatoriaGrid.addComponentColumn(convocatoria -> {
             Button editButton = new Button(i18nProvider.getTranslation("call.grid.edit", getLocale()), event ->
-                    UI.getCurrent().navigate(ModifyConvocatoriaView.class, convocatoria.getId()));
+                    UI.getCurrent().navigate(ModifyCallView.class, convocatoria.getId()));
             Button deleteButton = new Button(i18nProvider.getTranslation("call.grid.delete", getLocale()), event ->
                     deleteConvocatoria(convocatoria));
             return new HorizontalLayout(editButton, deleteButton);
         }).setHeader(i18nProvider.getTranslation("call.grid.actions", getLocale()));
     }
 
-    private void loadConvocatorias() {
+    private void loadCalls() {
         List<Convocatoria> convocatorias = convocatoriaService.getAllConvocatorias();
         convocatoriaGrid.setItems(convocatorias);
     }
@@ -155,7 +155,7 @@ public class ConvocatoriaView extends VerticalLayout {
                 editingId = null;
             }
             clearForm();
-            loadConvocatorias();
+            loadCalls();
         } catch (Exception e) {
             Notification.show(i18nProvider.getTranslation("call.notification.error", getLocale(), e.getMessage()), 5000, Notification.Position.MIDDLE);
         }
@@ -165,7 +165,7 @@ public class ConvocatoriaView extends VerticalLayout {
         try {
             convocatoriaService.deleteConvocatoria(convocatoria.getId());
             Notification.show(i18nProvider.getTranslation("call.notification.deleted", getLocale()));
-            loadConvocatorias();
+            loadCalls();
         } catch (Exception e) {
             Notification.show(i18nProvider.getTranslation("call.notification.error", getLocale(), e.getMessage()), 5000, Notification.Position.MIDDLE);
         }
