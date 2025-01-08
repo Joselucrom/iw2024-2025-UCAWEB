@@ -394,4 +394,10 @@ public class ProyectoService {
 
         emailService.sendEmail(proyecto.getCorreoSolicitante(), subject, body);
     }
+    public List<Proyecto> searchProjectsByConvocatoria(Convocatoria convocatoria) {
+        return proyectoRepository.findByConvocatoria(convocatoria);  // Requiere un repositorio adecuado que implemente el filtro
+    }
+    public List<Convocatoria> getAllConvocatorias() {
+        return convocatoriaRepository.findAll();
+    }
 }

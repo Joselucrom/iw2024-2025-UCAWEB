@@ -21,7 +21,6 @@ public class ConvocatoriaService {
     private EmailService emailService;
     @Autowired
     private UserService userService;
-    @Scheduled(cron = "0 0 0 * * ?")  // Configura el cron a medianoche de cada día
     // Crear una nueva convocatoria
     public Convocatoria createConvocatoria(String nombre, String objetivo, LocalDate fechaApertura,
                                            LocalDate fechaCierre, double presupuestoTotal, int cupoRecursosHumanos) {
@@ -90,11 +89,12 @@ public class ConvocatoriaService {
 
         sendEmailToUsers(subject, body);
     }
+    @Scheduled(cron = "0 0 0 * * ?")
     public void checkAndNotifyEndedConvocatorias() {
         List<Convocatoria> convocatorias = convocatoriaRepository.findAll();
-        LocalDate today = LocalDate.now();
+        LocalDate yesterday = LocalDate.now().minusDays(1);  // Obtener el día de ayer
         for (Convocatoria convocatoria : convocatorias) {
-            if (convocatoria.getFechaCierre().equals(today)) {
+            if (convocatoria.getFechaCierre().equals(yesterday)) {
                 notifyDeadlineEnd(convocatoria);
             }
         }
