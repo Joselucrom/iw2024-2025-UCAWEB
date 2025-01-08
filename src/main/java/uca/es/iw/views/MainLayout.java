@@ -64,10 +64,8 @@ public class MainLayout extends AppLayout {
     private void addHeaderContent() {
         DrawerToggle toggle = new DrawerToggle();
         toggle.setAriaLabel("Menu toggle");
-
-        // Agregar un logo
-        Image logo = new Image("images/logo_sin_fondo.png", "UCA Logo");
-        logo.setHeight("40px"); // Ajusta el tamaño del logo
+        toggle.getElement().getStyle()
+                .set("color", "white");
 
         // Estilo del título
         viewTitle = new H1("Universidad de Cádiz");
@@ -102,7 +100,7 @@ public class MainLayout extends AppLayout {
         englishItem.getElement().getStyle().set("color", "black");
 
         // Crear un contenedor horizontal para el header
-        HorizontalLayout headerLayout = new HorizontalLayout(toggle, logo, viewTitle, languageMenu);
+        HorizontalLayout headerLayout = new HorizontalLayout(toggle, viewTitle, languageMenu);
         headerLayout.setAlignItems(Alignment.CENTER);
         headerLayout.setWidthFull();
         headerLayout.setSpacing(true);
