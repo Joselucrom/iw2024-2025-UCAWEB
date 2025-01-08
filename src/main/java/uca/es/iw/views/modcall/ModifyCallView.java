@@ -1,4 +1,4 @@
-package uca.es.iw.views.modconvocatoria;
+package uca.es.iw.views.modcall;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -8,6 +8,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.router.*;
 import jakarta.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,39 +16,54 @@ import uca.es.iw.data.Convocatoria;
 import uca.es.iw.services.ConvocatoriaService;
 import uca.es.iw.views.MainLayout;
 
-@Route(value = "modificar-convocatoria", layout = MainLayout.class)
+@Route(value = "modify-call", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
-public class ModifyConvocatoriaView extends VerticalLayout implements HasUrlParameter<Long> {
+public class ModifyCallView extends VerticalLayout implements HasUrlParameter<Long> {
 
     private final ConvocatoriaService convocatoriaService;
+    private final I18NProvider i18nProvider;
 
-    private final TextField nombreField = new TextField("Nombre de la convocatoria");
-    private final TextField objetivoField = new TextField("Objetivo");
-    private final DatePicker fechaInicioField = new DatePicker("Fecha de inicio");
-    private final DatePicker fechaFinField = new DatePicker("Fecha de fin");
-    private final NumberField presupuestoField = new NumberField("Presupuesto (€)");
-    private final NumberField recursosHumanosField = new NumberField("Recursos Humanos");
+    private final TextField nombreField = new TextField();
+    private final TextField objetivoField = new TextField();
+    private final DatePicker fechaInicioField = new DatePicker();
+    private final DatePicker fechaFinField = new DatePicker();
+    private final NumberField presupuestoField = new NumberField();
+    private final NumberField recursosHumanosField = new NumberField();
 
     private Long convocatoriaId;
 
     @Autowired
-    public ModifyConvocatoriaView(ConvocatoriaService convocatoriaService) {
+    public ModifyCallView(ConvocatoriaService convocatoriaService, I18NProvider i18nProvider) {
         this.convocatoriaService = convocatoriaService;
-
+        this.i18nProvider = i18nProvider;
+        // Establecer el título de la página, que luego se pasará al MainLayout
+        getUI().ifPresent(ui -> ui.getPage().setTitle(i18nProvider.getTranslation("modify_call.title", getLocale())));
         setWidth("100%");
         setAlignItems(Alignment.CENTER);
-
         // Diseño
-        add(new H3("Modificar Convocatoria"));
-
         nombreField.setWidth("100%");
         objetivoField.setWidth("100%");
         fechaInicioField.setWidth("100%");
         fechaFinField.setWidth("100%");
         presupuestoField.setWidth("100%");
         recursosHumanosField.setWidth("100%");
+        // Título traducido
+        add(new H3(i18nProvider.getTranslation("modify_call.title", getLocale())));
 
-        Button saveButton = new Button("Guardar cambios", event -> saveChanges());
+        // Configurar etiquetas traducidas
+        nombreField.setLabel(i18nProvider.getTranslation("modify_call.name", getLocale()));
+        objetivoField.setLabel(i18nProvider.getTranslation("modify_call.objective", getLocale()));
+        fechaInicioField.setLabel(i18nProvider.getTranslation("modify_call.start_date", getLocale()));
+        fechaFinField.setLabel(i18nProvider.getTranslation("modify_call.end_date", getLocale()));
+        presupuestoField.setLabel(i18nProvider.getTranslation("modify_call.budget", getLocale()));
+        recursosHumanosField.setLabel(i18nProvider.getTranslation("modify_call.human_resources", getLocale()));
+
+        // Configurar botones con traducciones
+        Button saveButton = new Button(
+                i18nProvider.getTranslation("modify_call.save", getLocale()),
+                event -> saveChanges()
+        );
+
         add(nombreField, objetivoField, fechaInicioField, fechaFinField, presupuestoField, recursosHumanosField, saveButton);
     }
 
@@ -55,13 +71,13 @@ public class ModifyConvocatoriaView extends VerticalLayout implements HasUrlPara
     public void setParameter(BeforeEvent event, @OptionalParameter Long parameter) {
         if (parameter != null) {
             this.convocatoriaId = parameter;
-            loadConvocatoria(parameter);
+            loadCall(parameter);
         } else {
-            Notification.show("ID de convocatoria no proporcionado.", 3000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("modify_call.missing_id", getLocale()), 3000, Notification.Position.MIDDLE);
         }
     }
 
-    private void loadConvocatoria(Long id) {
+    private void loadCall(Long id) {
         Convocatoria convocatoria = convocatoriaService.getConvocatoriaById(id);
         if (convocatoria != null) {
             nombreField.setValue(convocatoria.getNombre());
@@ -71,7 +87,7 @@ public class ModifyConvocatoriaView extends VerticalLayout implements HasUrlPara
             presupuestoField.setValue(convocatoria.getPresupuestoTotal());
             recursosHumanosField.setValue((double) convocatoria.getCupoRecursosHumanos());
         } else {
-            Notification.show("Convocatoria no encontrada.", 3000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("modify_call.not_found", getLocale()), 3000, Notification.Position.MIDDLE);
         }
     }
 
@@ -86,10 +102,10 @@ public class ModifyConvocatoriaView extends VerticalLayout implements HasUrlPara
                     presupuestoField.getValue(),
                     recursosHumanosField.getValue().intValue()
             );
-            Notification.show("Convocatoria actualizada con éxito.", 3000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("modify_call.success", getLocale()), 3000, Notification.Position.MIDDLE);
             UI.getCurrent().navigate("convocatoria-management");
         } catch (Exception e) {
-            Notification.show("Error al guardar los cambios: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+            Notification.show(i18nProvider.getTranslation("modify_call.error", getLocale(), e.getMessage()), 5000, Notification.Position.MIDDLE);
         }
     }
 }
