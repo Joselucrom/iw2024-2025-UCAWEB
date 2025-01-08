@@ -135,6 +135,7 @@ public class MainLayout extends AppLayout {
             String translationKey = switch (entry.title()) {
                 case "WelcomeView" -> "welcome.title";
                 case "NewProjectView" -> "new_project.title";
+                case "ExplorarProyectosView" -> "explorar_proyectos.title";
                 case "CallView" -> "call.title";
                 default -> null;
             };
@@ -248,6 +249,8 @@ public class MainLayout extends AppLayout {
     private String getCurrentPageTitle() {
         String className = getContent().getClass().getSimpleName();
         switch (className) {
+            case "ExplorarProyectosView":
+                return "explorar_proyectos.title";
             case "NewProjectView":
                 return "new_project.title";
             case "ModifyCallView":
