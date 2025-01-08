@@ -1,6 +1,7 @@
 package uca.es.iw.views.misproyectos;
 
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -55,6 +56,7 @@ public class MisProyectosView extends VerticalLayout {
         grid.addColumn(Proyecto::getNombreSolicitante).setHeader("Solicitante").setAutoWidth(true);
         grid.addColumn(Proyecto::getEstado).setHeader("Estado").setAutoWidth(true);
         grid.addColumn(Proyecto::getFechaCreado).setHeader("Fecha de Creación").setAutoWidth(true);
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
     }
     
 
