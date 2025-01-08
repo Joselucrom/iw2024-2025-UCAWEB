@@ -66,7 +66,7 @@ public class MainLayout extends AppLayout {
         toggle.setAriaLabel("Menu toggle");
 
         // Agregar un logo
-        Image logo = new Image("images/uca-logo.png", "UCA Logo");
+        Image logo = new Image("images/logo_sin_fondo.png", "UCA Logo");
         logo.setHeight("40px"); // Ajusta el tamaño del logo
 
         // Estilo del título
