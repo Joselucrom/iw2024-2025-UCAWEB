@@ -1,6 +1,7 @@
 package uca.es.iw.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uca.es.iw.data.Convocatoria;
 import uca.es.iw.data.ConvocatoriaRepository;
@@ -20,6 +21,7 @@ public class ConvocatoriaService {
     private EmailService emailService;
     @Autowired
     private UserService userService;
+    @Scheduled(cron = "0 0 0 * * ?")  // Configura el cron a medianoche de cada día
     // Crear una nueva convocatoria
     public Convocatoria createConvocatoria(String nombre, String objetivo, LocalDate fechaApertura,
                                            LocalDate fechaCierre, double presupuestoTotal, int cupoRecursosHumanos) {
@@ -87,6 +89,15 @@ public class ConvocatoriaService {
                 "Saludos,\nEl equipo.";
 
         sendEmailToUsers(subject, body);
+    }
+    public void checkAndNotifyEndedConvocatorias() {
+        List<Convocatoria> convocatorias = convocatoriaRepository.findAll();
+        LocalDate today = LocalDate.now();
+        for (Convocatoria convocatoria : convocatorias) {
+            if (convocatoria.getFechaCierre().equals(today)) {
+                notifyDeadlineEnd(convocatoria);
+            }
+        }
     }
     //Aviso el dia finalizacion de convocatoria
     public void notifyDeadlineEnd(Convocatoria convocatoria) {
