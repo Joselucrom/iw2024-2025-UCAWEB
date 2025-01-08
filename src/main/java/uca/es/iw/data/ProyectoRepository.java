@@ -12,7 +12,7 @@ public interface ProyectoRepository extends JpaRepository<Proyecto, Long>, JpaSp
     @Query(value = """
 
     SELECT nombre_corto
-    FROM Proyecto
+    FROM proyecto
     WHERE estado = 'PENDIENTE'
     ORDER BY nombre_corto ASC;
     """, nativeQuery = true)
