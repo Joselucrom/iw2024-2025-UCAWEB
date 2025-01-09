@@ -23,14 +23,12 @@ public class ConvocatoriaService {
     private UserService userService;
     // Crear una nueva convocatoria
     public Convocatoria createConvocatoria(String nombre, String objetivo, LocalDate fechaApertura,
-                                           LocalDate fechaCierre, double presupuestoTotal, int cupoRecursosHumanos) {
+                                           LocalDate fechaCierre) {
         Convocatoria convocatoria = new Convocatoria();
         convocatoria.setNombre(nombre);
         convocatoria.setObjetivo(objetivo);
         convocatoria.setFechaApertura(fechaApertura);
         convocatoria.setFechaCierre(fechaCierre);
-        convocatoria.setPresupuestoTotal(presupuestoTotal);
-        convocatoria.setCupoRecursosHumanos(cupoRecursosHumanos);
         Convocatoria savedConvocatoria = convocatoriaRepository.save(convocatoria);
         sendCreationEmailToUsers(savedConvocatoria);
         return savedConvocatoria;
@@ -54,14 +52,12 @@ public class ConvocatoriaService {
     }
     //Modificar una convocatoria
     public Convocatoria updateConvocatoria(Long id, String nombre, String objetivo, LocalDate fechaApertura,
-                                           LocalDate fechaCierre, double presupuestoTotal, int cupoRecursosHumanos) {
+                                           LocalDate fechaCierre) {
         Convocatoria convocatoria = getConvocatoriaById(id);
         convocatoria.setNombre(nombre);
         convocatoria.setObjetivo(objetivo);
         convocatoria.setFechaApertura(fechaApertura);
         convocatoria.setFechaCierre(fechaCierre);
-        convocatoria.setPresupuestoTotal(presupuestoTotal);
-        convocatoria.setCupoRecursosHumanos(cupoRecursosHumanos);
         Convocatoria updatedConvocatoria = convocatoriaRepository.save(convocatoria);
         sendUpdateEmailToUsers(updatedConvocatoria);
         return updatedConvocatoria;

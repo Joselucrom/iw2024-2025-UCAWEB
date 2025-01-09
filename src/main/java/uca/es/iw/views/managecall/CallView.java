@@ -9,7 +9,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.router.Menu;
@@ -36,8 +35,6 @@ public class CallView extends VerticalLayout {
     private final TextField objetivoField = new TextField();
     private final DatePicker fechaInicioField = new DatePicker();
     private final DatePicker fechaFinField = new DatePicker();
-    private final NumberField presupuestoField = new NumberField();
-    private final NumberField recursosHumanosField = new NumberField();
     private final Button saveButton;
     private final Button clearButton;
 
@@ -64,16 +61,12 @@ public class CallView extends VerticalLayout {
         objetivoField.setWidth("100%");
         fechaInicioField.setWidth("100%");
         fechaFinField.setWidth("100%");
-        presupuestoField.setWidth("100%");
-        recursosHumanosField.setWidth("100%");
 
         // Configurar campos del formulario con traducción
         nombreField.setLabel(i18nProvider.getTranslation("call.name", getLocale()));
         objetivoField.setLabel(i18nProvider.getTranslation("call.objective", getLocale()));
         fechaInicioField.setLabel(i18nProvider.getTranslation("call.start_date", getLocale()));
         fechaFinField.setLabel(i18nProvider.getTranslation("call.end_date", getLocale()));
-        presupuestoField.setLabel(i18nProvider.getTranslation("call.budget", getLocale()));
-        recursosHumanosField.setLabel(i18nProvider.getTranslation("call.human_resources", getLocale()));
 
         // Configuración de botones con traducción
         saveButton = new Button(i18nProvider.getTranslation("call.save", getLocale()), event -> saveConvocatoria());
@@ -85,7 +78,7 @@ public class CallView extends VerticalLayout {
         buttonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
         // Diseño del formulario
-        add(nombreField, objetivoField, fechaInicioField, fechaFinField, presupuestoField, recursosHumanosField, buttonsLayout);
+        add(nombreField, objetivoField, fechaInicioField, fechaFinField, buttonsLayout);
 
         // Configuración del grid
         configureGrid();
@@ -109,12 +102,6 @@ public class CallView extends VerticalLayout {
         convocatoriaGrid.addColumn(Convocatoria::getFechaCierre)
                 .setHeader(i18nProvider.getTranslation("call.grid.end_date", getLocale()))
                 .setSortable(true);
-        convocatoriaGrid.addColumn(Convocatoria::getPresupuestoTotal)
-                .setHeader(i18nProvider.getTranslation("call.grid.budget", getLocale()))
-                .setSortable(true);
-        convocatoriaGrid.addColumn(Convocatoria::getCupoRecursosHumanos)
-                .setHeader(i18nProvider.getTranslation("call.grid.human_resources", getLocale()))
-                .setSortable(true);
         convocatoriaGrid.addComponentColumn(convocatoria -> {
             Button editButton = new Button(i18nProvider.getTranslation("call.grid.edit", getLocale()), event ->
                     UI.getCurrent().navigate(ModifyCallView.class, convocatoria.getId()));
@@ -136,9 +123,7 @@ public class CallView extends VerticalLayout {
                         nombreField.getValue(),
                         objetivoField.getValue(),
                         fechaInicioField.getValue(),
-                        fechaFinField.getValue(),
-                        presupuestoField.getValue(),
-                        recursosHumanosField.getValue().intValue()
+                        fechaFinField.getValue()
                 );
                 Notification.show(i18nProvider.getTranslation("call.notification.created", getLocale()));
             } else {
@@ -147,9 +132,7 @@ public class CallView extends VerticalLayout {
                         nombreField.getValue(),
                         objetivoField.getValue(),
                         fechaInicioField.getValue(),
-                        fechaFinField.getValue(),
-                        presupuestoField.getValue(),
-                        recursosHumanosField.getValue().intValue()
+                        fechaFinField.getValue()
                 );
                 Notification.show(i18nProvider.getTranslation("call.notification.updated", getLocale()));
                 editingId = null;
@@ -177,7 +160,5 @@ public class CallView extends VerticalLayout {
         objetivoField.clear();
         fechaInicioField.clear();
         fechaFinField.clear();
-        presupuestoField.clear();
-        recursosHumanosField.clear();
     }
 }

@@ -6,7 +6,6 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.router.*;
@@ -27,8 +26,6 @@ public class ModifyCallView extends VerticalLayout implements HasUrlParameter<Lo
     private final TextField objetivoField = new TextField();
     private final DatePicker fechaInicioField = new DatePicker();
     private final DatePicker fechaFinField = new DatePicker();
-    private final NumberField presupuestoField = new NumberField();
-    private final NumberField recursosHumanosField = new NumberField();
 
     private Long convocatoriaId;
 
@@ -45,8 +42,6 @@ public class ModifyCallView extends VerticalLayout implements HasUrlParameter<Lo
         objetivoField.setWidth("100%");
         fechaInicioField.setWidth("100%");
         fechaFinField.setWidth("100%");
-        presupuestoField.setWidth("100%");
-        recursosHumanosField.setWidth("100%");
         // Título traducido
         add(new H3(i18nProvider.getTranslation("modify_call.title", getLocale())));
 
@@ -55,8 +50,6 @@ public class ModifyCallView extends VerticalLayout implements HasUrlParameter<Lo
         objetivoField.setLabel(i18nProvider.getTranslation("modify_call.objective", getLocale()));
         fechaInicioField.setLabel(i18nProvider.getTranslation("modify_call.start_date", getLocale()));
         fechaFinField.setLabel(i18nProvider.getTranslation("modify_call.end_date", getLocale()));
-        presupuestoField.setLabel(i18nProvider.getTranslation("modify_call.budget", getLocale()));
-        recursosHumanosField.setLabel(i18nProvider.getTranslation("modify_call.human_resources", getLocale()));
 
         // Configurar botones con traducciones
         Button saveButton = new Button(
@@ -64,7 +57,7 @@ public class ModifyCallView extends VerticalLayout implements HasUrlParameter<Lo
                 event -> saveChanges()
         );
 
-        add(nombreField, objetivoField, fechaInicioField, fechaFinField, presupuestoField, recursosHumanosField, saveButton);
+        add(nombreField, objetivoField, fechaInicioField, fechaFinField, saveButton);
     }
 
     @Override
@@ -84,8 +77,6 @@ public class ModifyCallView extends VerticalLayout implements HasUrlParameter<Lo
             objetivoField.setValue(convocatoria.getObjetivo());
             fechaInicioField.setValue(convocatoria.getFechaApertura());
             fechaFinField.setValue(convocatoria.getFechaCierre());
-            presupuestoField.setValue(convocatoria.getPresupuestoTotal());
-            recursosHumanosField.setValue((double) convocatoria.getCupoRecursosHumanos());
         } else {
             Notification.show(i18nProvider.getTranslation("modify_call.not_found", getLocale()), 3000, Notification.Position.MIDDLE);
         }
@@ -98,9 +89,7 @@ public class ModifyCallView extends VerticalLayout implements HasUrlParameter<Lo
                     nombreField.getValue(),
                     objetivoField.getValue(),
                     fechaInicioField.getValue(),
-                    fechaFinField.getValue(),
-                    presupuestoField.getValue(),
-                    recursosHumanosField.getValue().intValue()
+                    fechaFinField.getValue()
             );
             Notification.show(i18nProvider.getTranslation("modify_call.success", getLocale()), 3000, Notification.Position.MIDDLE);
             UI.getCurrent().navigate("convocatoria-management");
