@@ -16,7 +16,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import jakarta.annotation.security.RolesAllowed;
@@ -72,7 +71,7 @@ public class TechnicalEvaluationView extends Composite<VerticalLayout> {
 
         getContent().setWidth("100%");
         getContent().getStyle().set("flex-grow", "1");
-        getContent().setJustifyContentMode(FlexComponent.JustifyContentMode.START);
+        getContent().setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         getContent().setAlignItems(Alignment.CENTER);
 
         layoutColumn2.setWidthFull();
@@ -248,6 +247,31 @@ public class TechnicalEvaluationView extends Composite<VerticalLayout> {
 
         // Asignar el layout final
         getContent().add(layoutColumn2);
+        getContent().add(layoutColumn2);
+        layoutColumn2.add(formLayout2Col);
+        formLayout2Col.add(comboBox);
+        layoutColumn2.add(downloadButton); // Añadir botón de descarga debajo del ComboBox
+        layoutColumn2.add(downloadButton2); // Añadir botón de descarga debajo del ComboBox
+        layoutColumn2.add(calificacionTecnicaLabel); // Añadir label de calificación técnica
+        layoutColumn2.add(hr);
+        layoutColumn2.add(h2);
+        layoutColumn2.add(hr2);
+        layoutColumn2.add(calidadAdecuacionFuncional);
+        layoutColumn2.add(calidadMantenibilidad);
+        layoutColumn2.add(calidadPortabilidad);
+        layoutColumn2.add(calidadEficiencia);
+        layoutColumn2.add(calidadUsabilidad);
+        layoutColumn2.add(calidadCompatibilidad);
+        layoutColumn2.add(calidadSeguridad);
+        layoutColumn2.add(hr3);
+        layoutColumn2.add(h22);
+        layoutColumn2.add(hr4);
+        layoutColumn2.add(gestionGarantia);
+        layoutColumn2.add(gestionTiempoRespuesta);
+        layoutColumn2.add(gestionAtencionCliente);
+        layoutColumn2.add(gestionDocumentacion);
+        layoutColumn2.add(layoutRow);
+        layoutRow.add(buttonPrimary);
     }
 
     private List<Integer> getNumericOptions() {
